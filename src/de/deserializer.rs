@@ -131,10 +131,7 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
                 let key: String = keys.entry(0)?;
                 let value = hash.get(key.as_str());
 
-                return visitor.visit_enum(EnumDeserializer::new(
-                    key,
-                    value.unwrap_or_default(),
-                ));
+                return visitor.visit_enum(EnumDeserializer::new(key, value.unwrap_or_default()));
             } else {
                 return Err(Error::new(
                     exception::type_error(),
