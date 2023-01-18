@@ -16,7 +16,7 @@ use magnus::{Error, Value};
 use serde::Deserialize;
 use std::ops::Deref;
 
-/// Deserialize a Ruby [`Value`] to Rust.
+/// Deserialize a Ruby [`Value`][`magnus::Value`] to Rust.
 ///
 /// See [`crate::serialize`] for the expected Ruby formats of various Rust types.
 ///

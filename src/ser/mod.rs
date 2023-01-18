@@ -17,7 +17,7 @@ use self::{
 use magnus::{Error, TryConvert};
 use serde::Serialize;
 
-/// Serialize Rust data to a Ruby [`Value`].
+/// Serialize Rust data to a Ruby [`Value`][`magnus::Value`].
 ///
 /// The most basic Rust types are converted as follows:
 ///
