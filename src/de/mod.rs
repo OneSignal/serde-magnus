@@ -41,7 +41,7 @@ use std::ops::Deref;
 ///     A { a: String },
 /// }
 ///
-/// let a: RHash = eval(
+/// let input: RHash = eval(
 ///     r#"
 ///     {
 ///       b: 1234,
@@ -54,15 +54,14 @@ use std::ops::Deref;
 /// )
 /// .unwrap();
 ///
-/// let a: A = deserialize(a).unwrap();
-///
-/// assert_eq!(B(1234), a.b);
-/// assert_eq!([123, -456, 789], a.c);
+/// let output: A = deserialize(input).unwrap();
+/// assert_eq!(B(1234), output.b);
+/// assert_eq!([123, -456, 789], output.c);
 /// assert_eq!(
 ///     Some(D::A {
 ///         a: String::from("test")
 ///     }),
-///     a.d
+///     output.d
 /// );
 /// ```
 pub fn deserialize<'i, Input, Output>(input: Input) -> Result<Output, Error>
