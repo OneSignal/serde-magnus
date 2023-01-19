@@ -2,6 +2,7 @@
 name = "serde_magnus"
 version = "0.1.0"
 edition = "2018"
+rust-version = "1.51"
 authors = ["George Claghorn <georgeclaghorn@gmail.com>"]
 repository = "https://github.com/georgeclaghorn/serde-magnus"
 homepage = "https://github.com/georgeclaghorn/serde-magnus"
