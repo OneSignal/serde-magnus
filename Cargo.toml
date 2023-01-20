@@ -12,6 +12,7 @@ license = "MIT"
 readme = "README.md"
 keywords = ["serde", "magnus", "ruby"]
 categories = ["development-tools::ffi"]
+exclude = [".gitignore", ".github"]
 
 [dependencies]
 serde = "1.0"
