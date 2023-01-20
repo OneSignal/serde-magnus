@@ -65,7 +65,7 @@ let _: Value = eval!("pp post", post).unwrap();
 ```
 
 [`serde_magnus::deserialize`] converts from a Ruby value to a Rust type implementing
-`serde::Deserialize`.
+[`serde::Deserialize`].
 
 ```rust
 use magnus::RHash;
