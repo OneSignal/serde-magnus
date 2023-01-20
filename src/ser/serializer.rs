@@ -2,7 +2,8 @@ use magnus::{RArray, RHash, RString, Value};
 use serde::Serialize;
 
 use super::{
-    MapSerializer, SeqSerializer, StructSerializer, StructVariantSerializer, TupleVariantSerializer,
+    enums::nest, MapSerializer, SeqSerializer, StructSerializer, StructVariantSerializer,
+    TupleVariantSerializer,
 };
 use crate::error::Error;
 
@@ -125,9 +126,7 @@ impl serde::Serializer for Serializer {
     where
         Value: Serialize + ?Sized,
     {
-        let hash = RHash::new();
-        hash.aset(variant, value.serialize(self)?)?;
-        Ok(hash.into())
+        nest(variant, &value.serialize(self)?)
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {

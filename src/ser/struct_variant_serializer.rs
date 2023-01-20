@@ -1,4 +1,4 @@
-use super::Serializer;
+use super::{enums::nest, Serializer};
 use crate::error::Error;
 use magnus::{RHash, Symbol, Value};
 use serde::{ser::SerializeStructVariant, Serialize};
@@ -32,8 +32,6 @@ impl SerializeStructVariant for StructVariantSerializer {
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        let hash = RHash::new();
-        hash.aset(self.variant, self.hash)?;
-        Ok(hash.into())
+        nest(self.variant, self.hash)
     }
 }

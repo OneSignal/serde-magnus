@@ -1,5 +1,6 @@
 mod serializer;
 
+mod enums;
 mod map_serializer;
 mod seq_serializer;
 mod struct_serializer;

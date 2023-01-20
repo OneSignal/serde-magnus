@@ -1,6 +1,6 @@
-use super::Serializer;
+use super::{enums::nest, Serializer};
 use crate::error::Error;
-use magnus::{RArray, RHash, Value};
+use magnus::{RArray, Value};
 use serde::{ser::SerializeTupleVariant, Serialize};
 
 pub struct TupleVariantSerializer {
@@ -28,8 +28,6 @@ impl SerializeTupleVariant for TupleVariantSerializer {
     }
 
     fn end(self) -> Result<Self::Ok, self::Error> {
-        let hash = RHash::new();
-        hash.aset(self.variant, self.array)?;
-        Ok(hash.into())
+        nest(self.variant, self.array)
     }
 }
