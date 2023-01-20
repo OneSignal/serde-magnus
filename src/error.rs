@@ -7,7 +7,10 @@ pub struct Error {
 }
 
 impl Error {
-    pub fn new<Message: Into<Cow<'static, str>>>(class: ExceptionClass, message: Message) -> Error {
+    pub fn new<Message>(class: ExceptionClass, message: Message) -> Error
+    where
+        Message: Into<Cow<'static, str>>,
+    {
         Error {
             inner: magnus::Error::new(class, message),
         }
@@ -23,13 +26,19 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {}
 
 impl serde::ser::Error for Error {
-    fn custom<Message: std::fmt::Display>(message: Message) -> Self {
+    fn custom<Message>(message: Message) -> Self
+    where
+        Message: fmt::Display,
+    {
         Error::new(exception::runtime_error(), message.to_string())
     }
 }
 
 impl serde::de::Error for Error {
-    fn custom<T: fmt::Display>(message: T) -> Self {
+    fn custom<Message>(message: Message) -> Self
+    where
+        Message: fmt::Display,
+    {
         Error::new(exception::runtime_error(), message.to_string())
     }
 }

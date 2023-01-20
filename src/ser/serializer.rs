@@ -80,7 +80,10 @@ impl serde::Serializer for Serializer {
         Ok(().into())
     }
 
-    fn serialize_some<T: Serialize + ?Sized>(self, value: &T) -> Result<Self::Ok, Self::Error> {
+    fn serialize_some<Value>(self, value: &Value) -> Result<Self::Ok, Self::Error>
+    where
+        Value: Serialize + ?Sized,
+    {
         value.serialize(self)
     }
 
@@ -101,21 +104,27 @@ impl serde::Serializer for Serializer {
         Ok(variant.into())
     }
 
-    fn serialize_newtype_struct<T: Serialize + ?Sized>(
+    fn serialize_newtype_struct<Value>(
         self,
         _name: &'static str,
-        value: &T,
-    ) -> Result<Self::Ok, Self::Error> {
+        value: &Value,
+    ) -> Result<Self::Ok, Self::Error>
+    where
+        Value: Serialize + ?Sized,
+    {
         value.serialize(self)
     }
 
-    fn serialize_newtype_variant<T: Serialize + ?Sized>(
+    fn serialize_newtype_variant<Value>(
         self,
         _name: &'static str,
         _index: u32,
         variant: &'static str,
-        value: &T,
-    ) -> Result<Self::Ok, Self::Error> {
+        value: &Value,
+    ) -> Result<Self::Ok, Self::Error>
+    where
+        Value: Serialize + ?Sized,
+    {
         let hash = RHash::new();
         hash.aset(variant, value.serialize(self)?)?;
         Ok(hash.into())

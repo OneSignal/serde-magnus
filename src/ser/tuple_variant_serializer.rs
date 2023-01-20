@@ -18,10 +18,10 @@ impl SerializeTupleVariant for TupleVariantSerializer {
     type Ok = Value;
     type Error = Error;
 
-    fn serialize_field<Field: Serialize + ?Sized>(
-        &mut self,
-        field: &Field,
-    ) -> Result<(), Self::Error> {
+    fn serialize_field<Field>(&mut self, field: &Field) -> Result<(), Self::Error>
+    where
+        Field: Serialize + ?Sized,
+    {
         self.array
             .push(field.serialize(Serializer)?)
             .map_err(Into::into)

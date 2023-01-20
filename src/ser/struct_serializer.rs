@@ -17,11 +17,14 @@ impl SerializeStruct for StructSerializer {
     type Ok = Value;
     type Error = Error;
 
-    fn serialize_field<Value: Serialize + ?Sized>(
+    fn serialize_field<Value>(
         &mut self,
         name: &'static str,
         value: &Value,
-    ) -> Result<(), Self::Error> {
+    ) -> Result<(), Self::Error>
+    where
+        Value: Serialize + ?Sized,
+    {
         self.hash
             .aset(Symbol::new(name), value.serialize(Serializer)?)
             .map_err(Into::into)

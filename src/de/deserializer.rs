@@ -171,7 +171,7 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
     }
 
     forward_to_deserialize_any! {
-        <T: Visitor<'i>>
+        <Visitor: Visitor<'i>>
         bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
         unit unit_struct seq tuple tuple_struct map struct identifier
     }

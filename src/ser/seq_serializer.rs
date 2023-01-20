@@ -20,10 +20,10 @@ impl SerializeSeq for SeqSerializer {
     type Ok = Value;
     type Error = Error;
 
-    fn serialize_element<Element: Serialize + ?Sized>(
-        &mut self,
-        element: &Element,
-    ) -> Result<(), Self::Error> {
+    fn serialize_element<Element>(&mut self, element: &Element) -> Result<(), Self::Error>
+    where
+        Element: Serialize + ?Sized,
+    {
         self.array
             .push(element.serialize(Serializer)?)
             .map_err(Into::into)
@@ -38,10 +38,10 @@ impl SerializeTuple for SeqSerializer {
     type Ok = Value;
     type Error = Error;
 
-    fn serialize_element<Element: Serialize + ?Sized>(
-        &mut self,
-        element: &Element,
-    ) -> Result<(), Self::Error> {
+    fn serialize_element<Element>(&mut self, element: &Element) -> Result<(), Self::Error>
+    where
+        Element: Serialize + ?Sized,
+    {
         <Self as SerializeSeq>::serialize_element(self, element)
     }
 
@@ -54,10 +54,10 @@ impl SerializeTupleStruct for SeqSerializer {
     type Ok = Value;
     type Error = Error;
 
-    fn serialize_field<Field: Serialize + ?Sized>(
-        &mut self,
-        field: &Field,
-    ) -> Result<(), Self::Error> {
+    fn serialize_field<Field>(&mut self, field: &Field) -> Result<(), Self::Error>
+    where
+        Field: Serialize + ?Sized,
+    {
         <Self as SerializeSeq>::serialize_element(self, field)
     }
 

@@ -21,15 +21,18 @@ impl SerializeMap for MapSerializer {
     type Ok = Value;
     type Error = Error;
 
-    fn serialize_key<Key: Serialize + ?Sized>(&mut self, key: &Key) -> Result<(), Self::Error> {
+    fn serialize_key<Key>(&mut self, key: &Key) -> Result<(), Self::Error>
+    where
+        Key: Serialize + ?Sized,
+    {
         self.key = key.serialize(Serializer)?;
         Ok(())
     }
 
-    fn serialize_value<Value: Serialize + ?Sized>(
-        &mut self,
-        value: &Value,
-    ) -> Result<(), Self::Error> {
+    fn serialize_value<Value>(&mut self, value: &Value) -> Result<(), Self::Error>
+    where
+        Value: Serialize + ?Sized,
+    {
         self.hash
             .aset(self.key, value.serialize(Serializer)?)
             .map_err(Into::into)
