@@ -9,6 +9,7 @@ homepage = "https://github.com/georgeclaghorn/serde-magnus"
 documentation = "https://docs.rs/serde_magnus"
 license = "MIT"
 readme = "README.md"
+keywords = ["serde", "magnus", "ruby"]
 
 [dependencies]
 serde = "1.0"
