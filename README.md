@@ -17,11 +17,11 @@ The [`serde_magnus::serialize`] function converts from a Rust type implementing 
 [`serde::Serialize`] trait into a Ruby equivalent.
 
 ```rust
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use magnus::{eval, Value};
 use serde_magnus::serialize;
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Post {
     title: String,
     content: String,
@@ -29,7 +29,7 @@ struct Post {
     tags: Vec<String>
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 struct Author {
     name: String,
     email_address: String
@@ -69,7 +69,7 @@ let _: Value = eval!("pp post", post).unwrap();
 
 ```rust
 use magnus::RHash;
-use serde_magnus::Deserialize;
+use serde_magnus::deserialize;
 
 let post: RHash = eval!(r#"
   {
