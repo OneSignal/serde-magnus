@@ -21,7 +21,7 @@ use serde::{Serialize, Deserialize};
 use magnus::{eval, Value};
 use serde_magnus::serialize;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 struct Post {
     title: String,
     content: String,
@@ -29,7 +29,7 @@ struct Post {
     tags: Vec<String>
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
 struct Author {
     name: String,
     email_address: String
@@ -50,18 +50,20 @@ let post = Post {
 
 let post: Value = serialize(&post)?;
 
-// Output:
-//
-//     {
-//       title: "Spring carnival planning update",
-//       content: "Here's what's new.",
-//       author: {
-//         name: "Martha",
-//         email_address: "martha@example.com"
-//       },
-//       tags: ["carnival", "update"]
-//     }
-let _: Value = eval!("pp post", post)?;
+assert!(eval!(
+    r#"
+    post == {
+      title: "Spring carnival planning update",
+      content: "Here's what's new.",
+      author: {
+        name: "Martha",
+        email_address: "martha@example.com"
+      },
+      tags: ["carnival", "update"]
+    }
+    "#,
+    post
+)?);
 ```
 
 [`serde_magnus::deserialize`] converts from a Ruby value to a Rust type implementing
@@ -85,18 +87,21 @@ let post: RHash = eval!(r#"
 
 let post: Post = deserialize(post)?;
 
-// Output:
-//
-//     Post {
-//         title: "Spring carnival planning update",
-//         content: "Here's what's new.",
-//         author: Author {
-//             name: "Martha",
-//             email_address: "martha@example.com"
-//         },
-//         tags: ["carnival", "update"]
-//     }
-println!("{:?}", post);
+assert_eq!(
+    Post {
+        title: "Spring carnival planning update".into(),
+        content: "Here's what's new.".into(),
+        author: Author {
+            name: "Martha".into(),
+            email_address: "martha@example.com".into(),
+        },
+        tags: vec![
+            "carnival".into(),
+            "update".into()
+        ]
+    },
+    post
+);
 ```
 
 [`serde_magnus::serialize`]: https://docs.rs/serde_magnus/latest/serde_magnus/fn.serialize.html

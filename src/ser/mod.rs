@@ -35,15 +35,15 @@ use serde::Serialize;
 /// | `&[u8]`                   | A `String` with ASCII-8BIT encoding |
 ///
 /// ```
-/// use magnus::{Integer, RString};
+/// use magnus::{eval, Value};
 /// use serde_magnus::serialize;
 /// # let _cleanup = unsafe { magnus::embed::init() };
 ///
-/// let output: Integer = serialize(&1234)?;
-/// assert_eq!(1234, output.to_u64()?);
+/// let output: Value = serialize(&1234)?;
+/// assert!(eval!("output == 1234", output)?);
 ///
-/// let output: RString = serialize("Hello, world!")?;
-/// assert_eq!("Hello, world!", output.to_string()?);
+/// let output: Value = serialize("Hello, world!")?;
+/// assert!(eval!("output == 'Hello, world!'", output)?);
 ///
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -55,17 +55,16 @@ use serde::Serialize;
 /// `Some` is unwrapped and its content value is recursively serialized.
 ///
 /// ```
-/// use magnus::{Integer, Value};
-/// use serde_magnus::serialize;
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
 /// # let _cleanup = unsafe { magnus::embed::init() };
-///
 /// let input: Option<u64> = None;
 /// let output: Value = serialize(&input)?;
-/// assert!(output.is_nil());
+/// assert!(eval!("output == nil", output)?);
 ///
 /// let input: Option<u64> = Some(1234);
-/// let output: Integer = serialize(&input)?;
-/// assert_eq!(1234, output.to_u64()?);
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!("output == 1234", output)?);
 ///
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -83,10 +82,10 @@ use serde::Serialize;
 /// keys. The field values are recursively serialized.
 ///
 /// ```
-/// use magnus::{Integer, RArray, RHash, Symbol, Value};
-/// use serde::Serialize;
-/// use serde_magnus::serialize;
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
 /// # let _cleanup = unsafe { magnus::embed::init() };
+/// use serde::Serialize;
 ///
 /// #[derive(Serialize)]
 /// struct A;
@@ -105,23 +104,18 @@ use serde::Serialize;
 /// }
 ///
 /// let output: Value = serialize(&A)?;
-/// assert!(output.is_nil());
+/// assert!(eval!("output == nil", output)?);
 ///
-/// let output: Integer = serialize(&B(1234))?;
-/// assert_eq!(1234, output.to_u64()?);
+/// let output: Value = serialize(&B(1234))?;
+/// assert!(eval!("output == 1234", output)?);
 ///
 /// let input = C(1234, false, B(5678));
-/// let output: RArray = serialize(&input)?;
-/// assert_eq!(3, output.len());
-/// assert_eq!(1234, output.entry::<u16>(0)?);
-/// assert_eq!(false, output.entry::<bool>(1)?);
-/// assert_eq!(5678, output.entry::<u16>(2)?);
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!("output == [1234, false, 5678]", output)?);
 ///
 /// let input = D { foo: 1234, bar: false, baz: B(5678) };
-/// let output: RHash = serialize(&input)?;
-/// assert_eq!(1234, output.lookup::<_, u16>(Symbol::new("foo"))?);
-/// assert_eq!(false, output.lookup::<_, bool>(Symbol::new("bar"))?);
-/// assert_eq!(5678, output.lookup::<_, u16>(Symbol::new("baz"))?);
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!("output == { foo: 1234, bar: false, baz: 5678 }", output)?);
 ///
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -144,11 +138,10 @@ use serde::Serialize;
 /// variant's field names as `Symbol` keys. The field values are recursively serialized.
 ///
 /// ```
-/// use magnus::{Integer, RArray, RHash, RString, Symbol, Value};
-/// use serde::Serialize;
-/// use serde_magnus::serialize;
+/// # use magnus::{eval, Value};
+/// # use serde::Serialize;
+/// # use serde_magnus::serialize;
 /// # let _cleanup = unsafe { magnus::embed::init() };
-///
 /// #[derive(Serialize)]
 /// enum A {
 ///     Z,
@@ -161,38 +154,50 @@ use serde::Serialize;
 ///     }
 /// }
 ///
-/// let output: RString = serialize(&A::Z)?;
-/// assert_eq!("Z", output.to_string()?);
+/// let output: Value = serialize(&A::Z)?;
+/// assert!(eval!(r#"output == "Z""#, output)?);
 ///
 /// let input = A::Y(1234);
-/// let output: RHash = serialize(&input)?;
-/// assert_eq!(1, output.len());
-/// assert_eq!(1234, output.lookup::<_, u16>("Y")?);
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!(r#"output == { "Y" => 1234 }"#, output)?);
 ///
 /// let input = A::X(
 ///     1234,
 ///     false,
 ///     Box::new(A::Y(5678))
 /// );
-/// let output: RHash = serialize(&input)?;
-/// let value: RArray = output.lookup("X")?;
-/// assert_eq!(3, value.len());
-/// assert_eq!(1234, value.entry::<u16>(0)?);
-/// assert_eq!(false, value.entry::<bool>(1)?);
-/// let value: RHash = value.entry(2)?;
-/// assert_eq!(5678, value.lookup::<_, u16>("Y")?);
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!(
+///     r#"
+///     output == {
+///       "X" => [
+///         1234,
+///         false,
+///         { "Y" => 5678 }
+///       ]
+///     }
+///     "#,
+///     output
+/// )?);
 ///
 /// let input = A::W {
 ///     foo: 1234,
 ///     bar: false,
 ///     baz: Box::new(A::Y(5678))
 /// };
-/// let output: RHash = serialize(&input)?;
-/// let value: RHash = output.lookup("W")?;
-/// assert_eq!(1234, value.lookup::<_, u16>(Symbol::new("foo"))?);
-/// assert_eq!(false, value.lookup::<_, bool>(Symbol::new("bar"))?);
-/// let value: RHash = value.lookup(Symbol::new("baz"))?;
-/// assert_eq!(5678, value.lookup::<_, u16>("Y")?);
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!(
+///     r#"
+///     output == {
+///       "W" => {
+///         foo: 1234,
+///         bar: false,
+///         baz: { "Y" => 5678 }
+///       }
+///     }
+///     "#,
+///     output
+/// )?);
 ///
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -203,23 +208,16 @@ use serde::Serialize;
 /// Its members are recursively serialized.
 ///
 /// ```
-/// use magnus::{Integer, RArray};
-/// use serde_magnus::serialize;
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
 /// # let _cleanup = unsafe { magnus::embed::init() };
-///
 /// let input = (123, false, "Hello, world!");
-/// let output: RArray = serialize(&input)?;
-/// assert_eq!(3, output.len());
-/// assert_eq!(123, output.entry::<i64>(0)?);
-/// assert_eq!(false, output.entry::<bool>(1)?);
-/// assert_eq!("Hello, world!", output.entry::<String>(2)?);
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!("output == [123, false, 'Hello, world!']", output)?);
 ///
 /// let input = [123, 456, 789];
-/// let output: RArray = serialize(&input)?;
-/// assert_eq!(3, output.len());
-/// assert_eq!(123, output.entry::<i64>(0)?);
-/// assert_eq!(456, output.entry::<i64>(1)?);
-/// assert_eq!(789, output.entry::<i64>(2)?);
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!("output == [123, 456, 789]", output)?);
 ///
 /// # Ok::<(), magnus::Error>(())
 /// ```
