@@ -58,7 +58,7 @@ use std::ops::Deref;
 /// assert_eq!([123, -456, 789], output.c);
 /// assert_eq!(
 ///     Some(D::A {
-///         a: String::from("test")
+///         a: "test".into()
 ///     }),
 ///     output.d
 /// );

@@ -36,15 +36,15 @@ struct Author {
 }
 
 let post = Post {
-    title: String::from("Spring carnival planning update"),
-    content: String::from("Here's what's new."),
+    title: "Spring carnival planning update".into(),
+    content: "Here's what's new.".into(),
     author: Author {
-        name: String::from("Martha"),
-        email_address: String::from("martha@example.com")
+        name: "Martha".into(),
+        email_address: "martha@example.com".into()
     },
     tags: vec![
-        String::from("carnival"),
-        String::from("update")
+        "carnival".into(),
+        "update".into()
     ]
 };
 

@@ -24,7 +24,7 @@ fn test_serializing_structs() -> Result<(), Error> {
     assert_eq!(123, output.to_u64()?);
 
     let output: RHash = serialize(&C {
-        message: String::from("Hello, world!"),
+        message: "Hello, world!".into(),
     })?;
     assert_eq!(1, output.len());
 

@@ -23,7 +23,7 @@ fn test_serializing_enums() -> Result<(), Error> {
     assert_eq!(123, value.to_u64()?);
 
     let output: RHash = serialize(&A::C {
-        message: String::from("Hello, world!"),
+        message: "Hello, world!".into(),
     })?;
     assert_eq!(1, output.len());
 
