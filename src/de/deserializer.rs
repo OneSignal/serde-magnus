@@ -129,9 +129,9 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
             if hash.len() == 1 {
                 let keys: RArray = hash.funcall("keys", ())?;
                 let key: String = keys.entry(0)?;
-                let value = hash.get(key.as_str());
+                let value = hash.get(key.as_str()).unwrap_or_default();
 
-                return visitor.visit_enum(EnumDeserializer::new(key, value.unwrap_or_default()));
+                return visitor.visit_enum(EnumDeserializer::new(key, value));
             } else {
                 return Err(Error::new(
                     exception::type_error(),
