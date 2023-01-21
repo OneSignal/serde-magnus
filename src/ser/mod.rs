@@ -196,6 +196,33 @@ use serde::Serialize;
 ///
 /// # Ok::<(), magnus::Error>(())
 /// ```
+///
+/// ### Compound types
+///
+/// A compound type such as a tuple `(T1, T2, T3, ...)` or array `[T]` is converted to an `Array`.
+/// Its members are recursively serialized.
+///
+/// ```
+/// use magnus::{Integer, RArray};
+/// use serde_magnus::serialize;
+/// # let _cleanup = unsafe { magnus::embed::init() };
+///
+/// let input = (123, false, "Hello, world!");
+/// let output: RArray = serialize(&input)?;
+/// assert_eq!(3, output.len());
+/// assert_eq!(123, output.entry::<i64>(0)?);
+/// assert_eq!(false, output.entry::<bool>(1)?);
+/// assert_eq!("Hello, world!", output.entry::<String>(2)?);
+///
+/// let input = [123, 456, 789];
+/// let output: RArray = serialize(&input)?;
+/// assert_eq!(3, output.len());
+/// assert_eq!(123, output.entry::<i64>(0)?);
+/// assert_eq!(456, output.entry::<i64>(1)?);
+/// assert_eq!(789, output.entry::<i64>(2)?);
+///
+/// # Ok::<(), magnus::Error>(())
+/// ```
 pub fn serialize<Input, Output>(input: &Input) -> Result<Output, Error>
 where
     Input: Serialize + ?Sized,
