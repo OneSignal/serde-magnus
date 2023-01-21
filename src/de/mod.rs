@@ -51,10 +51,9 @@ use std::ops::Deref;
 ///       }
 ///     }
 ///     "#,
-/// )
-/// .unwrap();
+/// )?;
 ///
-/// let output: A = deserialize(input).unwrap();
+/// let output: A = deserialize(input)?;
 /// assert_eq!(B(1234), output.b);
 /// assert_eq!([123, -456, 789], output.c);
 /// assert_eq!(
@@ -63,6 +62,8 @@ use std::ops::Deref;
 ///     }),
 ///     output.d
 /// );
+///
+/// # Ok::<(), magnus::Error>(())
 /// ```
 pub fn deserialize<'i, Input, Output>(input: Input) -> Result<Output, Error>
 where

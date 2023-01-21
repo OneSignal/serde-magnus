@@ -1,4 +1,4 @@
-use magnus::{Integer, RHash, Symbol, QNIL};
+use magnus::{Error, Integer, RHash, Symbol, QNIL};
 use serde::Deserialize;
 use serde_magnus::deserialize;
 
@@ -14,23 +14,25 @@ struct C {
 }
 
 #[test]
-fn test_deserializing_structs() {
+fn test_deserializing_structs() -> Result<(), Error> {
     let _cleanup = unsafe { magnus::embed::init() };
 
-    assert_eq!(A, deserialize(QNIL).unwrap());
+    assert_eq!(A, deserialize(QNIL)?);
 
     let input = Integer::from_u64(123);
-    let output: B = deserialize(input).unwrap();
+    let output: B = deserialize(input)?;
     assert_eq!(B(123), output);
 
     let input = RHash::new();
-    input.aset(Symbol::new("message"), "Hello, world!").unwrap();
+    input.aset(Symbol::new("message"), "Hello, world!")?;
 
-    let output: C = deserialize(input).unwrap();
+    let output: C = deserialize(input)?;
     assert_eq!(
         C {
             message: "Hello, world!".into()
         },
         output
     );
+
+    Ok(())
 }

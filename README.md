@@ -48,7 +48,7 @@ let post = Post {
     ]
 };
 
-let post: Value = serialize(&post).unwrap();
+let post: Value = serialize(&post)?;
 
 // Output:
 //
@@ -61,7 +61,7 @@ let post: Value = serialize(&post).unwrap();
 //       },
 //       tags: ["carnival", "update"]
 //     }
-let _: Value = eval!("pp post", post).unwrap();
+let _: Value = eval!("pp post", post)?;
 ```
 
 [`serde_magnus::deserialize`] converts from a Ruby value to a Rust type implementing
@@ -81,9 +81,9 @@ let post: RHash = eval!(r#"
     },
     tags: ["carnival", "update"]
   }
-"#).unwrap();
+"#)?;
 
-let post: Post = deserialize(post).unwrap();
+let post: Post = deserialize(post)?;
 
 // Output:
 //

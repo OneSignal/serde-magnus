@@ -39,11 +39,13 @@ use serde::Serialize;
 /// use serde_magnus::serialize;
 /// # let _cleanup = unsafe { magnus::embed::init() };
 ///
-/// let output: Integer = serialize(&1234).unwrap();
-/// assert_eq!(1234, output.to_u64().unwrap());
+/// let output: Integer = serialize(&1234)?;
+/// assert_eq!(1234, output.to_u64()?);
 ///
-/// let output: RString = serialize("Hello, world!").unwrap();
-/// assert_eq!("Hello, world!", output.to_string().unwrap());
+/// let output: RString = serialize("Hello, world!")?;
+/// assert_eq!("Hello, world!", output.to_string()?);
+///
+/// # Ok::<(), magnus::Error>(())
 /// ```
 ///
 /// ### `Option`
@@ -58,12 +60,14 @@ use serde::Serialize;
 /// # let _cleanup = unsafe { magnus::embed::init() };
 ///
 /// let input: Option<u64> = None;
-/// let output: Value = serialize(&input).unwrap();
+/// let output: Value = serialize(&input)?;
 /// assert!(output.is_nil());
 ///
 /// let input: Option<u64> = Some(1234);
-/// let output: Integer = serialize(&input).unwrap();
-/// assert_eq!(1234, output.to_u64().unwrap());
+/// let output: Integer = serialize(&input)?;
+/// assert_eq!(1234, output.to_u64()?);
+///
+/// # Ok::<(), magnus::Error>(())
 /// ```
 ///
 /// ### Structs
@@ -100,24 +104,26 @@ use serde::Serialize;
 ///     baz: B
 /// }
 ///
-/// let output: Value = serialize(&A).unwrap();
+/// let output: Value = serialize(&A)?;
 /// assert!(output.is_nil());
 ///
-/// let output: Integer = serialize(&B(1234)).unwrap();
-/// assert_eq!(1234, output.to_u64().unwrap());
+/// let output: Integer = serialize(&B(1234))?;
+/// assert_eq!(1234, output.to_u64()?);
 ///
 /// let input = C(1234, false, B(5678));
-/// let output: RArray = serialize(&input).unwrap();
+/// let output: RArray = serialize(&input)?;
 /// assert_eq!(3, output.len());
-/// assert_eq!(1234, output.entry(0).unwrap());
-/// assert_eq!(false, output.entry(1).unwrap());
-/// assert_eq!(5678, output.entry(2).unwrap());
+/// assert_eq!(1234, output.entry::<u16>(0)?);
+/// assert_eq!(false, output.entry::<bool>(1)?);
+/// assert_eq!(5678, output.entry::<u16>(2)?);
 ///
 /// let input = D { foo: 1234, bar: false, baz: B(5678) };
-/// let output: RHash = serialize(&input).unwrap();
-/// assert_eq!(1234, output.lookup(Symbol::new("foo")).unwrap());
-/// assert_eq!(false, output.lookup(Symbol::new("bar")).unwrap());
-/// assert_eq!(5678, output.lookup(Symbol::new("baz")).unwrap());
+/// let output: RHash = serialize(&input)?;
+/// assert_eq!(1234, output.lookup::<_, u16>(Symbol::new("foo"))?);
+/// assert_eq!(false, output.lookup::<_, bool>(Symbol::new("bar"))?);
+/// assert_eq!(5678, output.lookup::<_, u16>(Symbol::new("baz"))?);
+///
+/// # Ok::<(), magnus::Error>(())
 /// ```
 ///
 /// ### Enums
@@ -155,38 +161,40 @@ use serde::Serialize;
 ///     }
 /// }
 ///
-/// let output: RString = serialize(&A::Z).unwrap();
-/// assert_eq!("Z", output.to_string().unwrap());
+/// let output: RString = serialize(&A::Z)?;
+/// assert_eq!("Z", output.to_string()?);
 ///
 /// let input = A::Y(1234);
-/// let output: RHash = serialize(&input).unwrap();
+/// let output: RHash = serialize(&input)?;
 /// assert_eq!(1, output.len());
-/// assert_eq!(1234, output.lookup("Y").unwrap());
+/// assert_eq!(1234, output.lookup::<_, u16>("Y")?);
 ///
 /// let input = A::X(
 ///     1234,
 ///     false,
 ///     Box::new(A::Y(5678))
 /// );
-/// let output: RHash = serialize(&input).unwrap();
-/// let value: RArray = output.lookup("X").unwrap();
+/// let output: RHash = serialize(&input)?;
+/// let value: RArray = output.lookup("X")?;
 /// assert_eq!(3, value.len());
-/// assert_eq!(1234, value.entry(0).unwrap());
-/// assert_eq!(false, value.entry(1).unwrap());
-/// let value: RHash = value.entry(2).unwrap();
-/// assert_eq!(5678, value.lookup("Y").unwrap());
+/// assert_eq!(1234, value.entry::<u16>(0)?);
+/// assert_eq!(false, value.entry::<bool>(1)?);
+/// let value: RHash = value.entry(2)?;
+/// assert_eq!(5678, value.lookup::<_, u16>("Y")?);
 ///
 /// let input = A::W {
 ///     foo: 1234,
 ///     bar: false,
 ///     baz: Box::new(A::Y(5678))
 /// };
-/// let output: RHash = serialize(&input).unwrap();
-/// let value: RHash = output.lookup("W").unwrap();
-/// assert_eq!(1234, value.lookup(Symbol::new("foo")).unwrap());
-/// assert_eq!(false, value.lookup(Symbol::new("bar")).unwrap());
-/// let value: RHash = value.lookup(Symbol::new("baz")).unwrap();
-/// assert_eq!(5678, value.lookup("Y").unwrap());
+/// let output: RHash = serialize(&input)?;
+/// let value: RHash = output.lookup("W")?;
+/// assert_eq!(1234, value.lookup::<_, u16>(Symbol::new("foo"))?);
+/// assert_eq!(false, value.lookup::<_, bool>(Symbol::new("bar"))?);
+/// let value: RHash = value.lookup(Symbol::new("baz"))?;
+/// assert_eq!(5678, value.lookup::<_, u16>("Y")?);
+///
+/// # Ok::<(), magnus::Error>(())
 /// ```
 pub fn serialize<Input, Output>(input: &Input) -> Result<Output, Error>
 where
