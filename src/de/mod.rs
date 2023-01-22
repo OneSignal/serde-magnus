@@ -65,6 +65,15 @@ use std::ops::Deref;
 ///
 /// # Ok::<(), magnus::Error>(())
 /// ```
+///
+/// ### Borrowing
+///
+/// Although [`serde::Deserialize`] is implemented for `&str`, `&[u8]`, and `&std::path::Path`, it
+/// is not possible to deserialize to these types from Ruby values. Any attempt to do so will
+/// result in an `Err`. The reason is that it cannot be guaranteed the underlying Ruby data will
+/// outlive the borrow.
+///
+/// Use owned equivalents such as `String`, `Vec<u8>`, and [`std::path::PathBuf`] instead.
 pub fn deserialize<'i, Input, Output>(input: Input) -> Result<Output, Error>
 where
     Input: Deref<Target = Value>,
