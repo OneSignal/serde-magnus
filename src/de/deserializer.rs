@@ -74,12 +74,22 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
         ))
     }
 
-    fn deserialize_bytes<Visitor>(self, visitor: Visitor) -> Result<Visitor::Value, Self::Error>
+    fn deserialize_bytes<Visitor>(self, _visitor: Visitor) -> Result<Visitor::Value, Self::Error>
+    where
+        Visitor: serde::de::Visitor<'i>,
+    {
+        Err(Error::new(
+            exception::type_error(),
+            "can't deserialize into byte slice",
+        ))
+    }
+
+    fn deserialize_byte_buf<Visitor>(self, visitor: Visitor) -> Result<Visitor::Value, Self::Error>
     where
         Visitor: serde::de::Visitor<'i>,
     {
         if let Some(string) = RString::from_value(self.value) {
-            visitor.visit_bytes(unsafe { string.as_slice() })
+            visitor.visit_byte_buf(unsafe { string.as_slice() }.to_owned())
         } else {
             Err(Error::new(
                 exception::type_error(),
@@ -89,13 +99,6 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
                 ),
             ))
         }
-    }
-
-    fn deserialize_byte_buf<Visitor>(self, visitor: Visitor) -> Result<Visitor::Value, Self::Error>
-    where
-        Visitor: serde::de::Visitor<'i>,
-    {
-        self.deserialize_bytes(visitor)
     }
 
     fn deserialize_option<Visitor>(self, visitor: Visitor) -> Result<Visitor::Value, Self::Error>
