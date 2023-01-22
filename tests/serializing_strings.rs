@@ -1,5 +1,5 @@
 use magnus::{encoding, encoding::EncodingCapable, Error, RString};
-use serde_bytes::{Bytes, ByteBuf};
+use serde_bytes::{ByteBuf, Bytes};
 use serde_magnus::serialize;
 
 #[test]
