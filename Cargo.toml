@@ -1,6 +1,6 @@
 [package]
 name = "serde_magnus"
-version = "0.1.0"
+version = "0.1.1"
 description = "Serde integration for Magnus"
 edition = "2018"
 rust-version = "1.51"
