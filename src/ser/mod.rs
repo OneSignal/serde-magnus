@@ -67,6 +67,25 @@ use serde::Serialize;
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
+/// ### `Result`
+///
+/// A `Result` is converted to a `Hash` with one key, `"Ok"` or `"Err"`.
+///
+/// ```
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// let input: Result<u64, &str> = Ok(1234);
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!("output == { 'Ok' => 1234 }", output)?);
+///
+/// let input: Result<u64, &str> = Err("something went wrong");
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!("output == { 'Err' => 'something went wrong' }", output)?);
+///
+/// # Ok::<(), magnus::Error>(())
+/// ```
+///
 /// ### Structs
 ///
 /// A unit struct is converted to `nil`.
