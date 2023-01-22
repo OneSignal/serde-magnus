@@ -10,11 +10,15 @@ fn test_serializing_strings() -> Result<(), Error> {
     assert_eq!("☃", output.to_string()?);
     assert!(output.enc_get() == encoding::Index::utf8());
 
-    let output: RString = serialize("Hello, world!")?;
+    let output: RString = serialize(&"Hello, world!")?;
     assert_eq!("Hello, world!", output.to_string()?);
     assert!(output.enc_get() == encoding::Index::utf8());
 
-    let output: RString = serialize(Bytes::new(b"Hello, world!"))?;
+    let output: RString = serialize(&String::from("Hello, world!"))?;
+    assert_eq!("Hello, world!", output.to_string()?);
+    assert!(output.enc_get() == encoding::Index::utf8());
+
+    let output: RString = serialize(&Bytes::new(b"Hello, world!"))?;
     assert_eq!(b"Hello, world!", unsafe { output.as_slice() });
     assert!(output.enc_get() == encoding::Index::ascii8bit());
 
