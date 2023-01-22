@@ -20,7 +20,7 @@ use serde::Serialize;
 
 /// Serialize Rust data to a Ruby [`Value`][`magnus::Value`].
 ///
-/// The most basic Rust types are converted as follows:
+/// Primitive types are converted as follows:
 ///
 /// | Rust type                 | Ruby value                          |
 /// |---------------------------|-------------------------------------|
