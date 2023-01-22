@@ -221,6 +221,53 @@ use serde::Serialize;
 ///
 /// # Ok::<(), magnus::Error>(())
 /// ```
+///
+/// ### Collections
+///
+/// A sequence such as a `Vec`, `LinkedList`, or `HashSet` is converted to an `Array`. Its members
+/// are recursively serialized.
+///
+/// ```
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// let input = vec![123, 456, 789];
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!("output == [123, 456, 789]", output)?);
+///
+/// # Ok::<(), magnus::Error>(())
+/// ```
+///
+/// A map such as a `HashMap` or `BTreeMap` is converted to a `Hash`. Its keys and values are
+/// recursively serialized.
+///
+/// ```
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// use std::collections::HashMap;
+///
+/// let input = HashMap::from([
+///     ("yes", "no"),
+///     ("stop", "go"),
+///     ("high", "low"),
+///     ("goodbye", "hello")
+/// ]);
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!(
+///     r#"
+///     output == {
+///       "yes"     => "no",
+///       "stop"    => "go",
+///       "high"    => "low",
+///       "goodbye" => "hello"
+///     }
+///     "#,
+///     output
+/// )?);
+///
+/// # Ok::<(), magnus::Error>(())
+/// ```
 pub fn serialize<Input, Output>(input: &Input) -> Result<Output, Error>
 where
     Input: Serialize + ?Sized,
