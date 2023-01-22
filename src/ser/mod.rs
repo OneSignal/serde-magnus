@@ -50,9 +50,7 @@ use serde::Serialize;
 ///
 /// ### `Option`
 ///
-/// `None` is converted to `nil`.
-///
-/// `Some` is unwrapped and its content value is recursively serialized.
+/// `None` is converted to `nil`. `Some` is unwrapped.
 ///
 /// ```
 /// # use magnus::{eval, Value};
@@ -73,13 +71,11 @@ use serde::Serialize;
 ///
 /// A unit struct (`A` in the example code below) is converted to `nil`.
 ///
-/// A newtype struct (`B`) is unwrapped. Its value is recursively serialized.
+/// A newtype struct (`B`) is unwrapped.
 ///
-/// A tuple struct (`C`) is converted to an `Array`. The `Array` contains the struct's fields,
-/// recursively serialized.
+/// A tuple struct (`C`) is converted to an `Array` containing the struct's fields.
 ///
-/// A struct with named fields (`D`) is converted to a `Hash` with the field names as `Symbol`
-/// keys. The field values are recursively serialized.
+/// A struct with named fields (`D`) is converted to a `Hash` with the field names as `Symbol` keys.
 ///
 /// ```
 /// # use magnus::{eval, Value};
@@ -128,14 +124,14 @@ use serde::Serialize;
 /// All other types of enum variants (`A::Y`, `A::X`, `A::W`) are converted to a `Hash` with one
 /// key: the name of the variant as a `String` (`"Y"`', `"X"`, `"W"`).
 ///
-/// For a newtype enum variant (`A::Y`), the value keyed by the variant name is the variant's value
-/// recursively serialized.
+/// For a newtype enum variant (`A::Y`), the value keyed by the variant's name is its unwrapped
+/// value.
 ///
 /// For a tuple enum variant (`A::X`), the value keyed by the variant name is an `Array` containing
-/// the variant's fields recursively serialized.
+/// the variant's fields.
 ///
 /// For a struct enum variant (`A::W`), the value keyed by the variant name is a `Hash` with the
-/// variant's field names as `Symbol` keys. The field values are recursively serialized.
+/// variant's field names as `Symbol` keys.
 ///
 /// ```
 /// # use magnus::{eval, Value};
@@ -205,7 +201,6 @@ use serde::Serialize;
 /// ### Compound types
 ///
 /// A compound type such as a tuple `(T1, T2, T3, ...)` or array `[T]` is converted to an `Array`.
-/// Its members are recursively serialized.
 ///
 /// ```
 /// # use magnus::{eval, Value};
@@ -224,8 +219,7 @@ use serde::Serialize;
 ///
 /// ### Collections
 ///
-/// A sequence such as a `Vec`, `LinkedList`, or `HashSet` is converted to an `Array`. Its members
-/// are recursively serialized.
+/// A sequence such as a `Vec`, `LinkedList`, or `HashSet` is converted to an `Array`.
 ///
 /// ```
 /// # use magnus::{eval, Value};
@@ -238,8 +232,7 @@ use serde::Serialize;
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
-/// A map such as a `HashMap` or `BTreeMap` is converted to a `Hash`. Its keys and values are
-/// recursively serialized.
+/// A map such as a `HashMap` or `BTreeMap` is converted to a `Hash`.
 ///
 /// ```
 /// # use magnus::{eval, Value};
