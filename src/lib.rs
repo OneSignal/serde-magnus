@@ -8,7 +8,7 @@
 //!
 //! ```
 //! use serde::{Serialize, Deserialize};
-//! use magnus::{eval, RArray, RHash, RString, Symbol};
+//! use magnus::{eval, Value};
 //! use serde_magnus::serialize;
 //! # let _cleanup = unsafe { magnus::embed::init() };
 //!
@@ -39,7 +39,7 @@
 //!     ]
 //! };
 //!
-//! let post: RHash = serialize(&post)?;
+//! let post: Value = serialize(&post)?;
 //!
 //! assert!(eval!(
 //!     r#"
