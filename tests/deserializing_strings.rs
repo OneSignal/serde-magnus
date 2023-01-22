@@ -9,6 +9,12 @@ fn test_deserializing_strings() -> Result<(), Error> {
     let output: char = deserialize(RString::new("☃"))?;
     assert_eq!('☃', output);
 
+    let output: Result<&str, Error> = deserialize(RString::new("Hello, world!"));
+    assert_eq!(
+        "TypeError: can't deserialize into borrowed string",
+        output.unwrap_err().to_string()
+    );
+
     let output: String = deserialize(RString::new("Hello, world!"))?;
     assert_eq!("Hello, world!", output);
 
