@@ -69,13 +69,7 @@ use serde::Serialize;
 ///
 /// ### Structs
 ///
-/// A unit struct (`A` in the example code below) is converted to `nil`.
-///
-/// A newtype struct (`B`) is unwrapped.
-///
-/// A tuple struct (`C`) is converted to an `Array` containing the struct's fields.
-///
-/// A struct with named fields (`D`) is converted to a `Hash` with the field names as `Symbol` keys.
+/// A unit struct is converted to `nil`.
 ///
 /// ```
 /// # use magnus::{eval, Value};
@@ -84,34 +78,74 @@ use serde::Serialize;
 /// use serde::Serialize;
 ///
 /// #[derive(Serialize)]
-/// struct A;
+/// struct Foo;
 ///
-/// #[derive(Serialize)]
-/// struct B(u16);
-///
-/// #[derive(Serialize)]
-/// struct C(u16, bool, B);
-///
-/// #[derive(Serialize)]
-/// struct D {
-///     foo: u16,
-///     bar: bool,
-///     baz: B
-/// }
-///
-/// let output: Value = serialize(&A)?;
+/// let output: Value = serialize(&Foo)?;
 /// assert!(eval!("output == nil", output)?);
 ///
-/// let output: Value = serialize(&B(1234))?;
+/// # Ok::<(), magnus::Error>(())
+/// ```
+///
+/// A newtype struct is unwrapped.
+///
+/// ```
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # use serde::Serialize;
+/// #[derive(Serialize)]
+/// struct Foo(u16);
+///
+/// let input = Foo(1234);
+/// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == 1234", output)?);
 ///
-/// let input = C(1234, false, B(5678));
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == [1234, false, 5678]", output)?);
+/// # Ok::<(), magnus::Error>(())
+/// ```
 ///
-/// let input = D { foo: 1234, bar: false, baz: B(5678) };
+/// A tuple struct is converted to an `Array` of its fields.
+///
+/// ```
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # use serde::Serialize;
+/// #[derive(Serialize)]
+/// struct Foo<'a>(u16, bool, &'a str);
+///
+/// let input = Foo(1234, false, "Hello, world!");
 /// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == { foo: 1234, bar: false, baz: 5678 }", output)?);
+/// assert!(eval!("output == [1234, false, 'Hello, world!']", output)?);
+///
+/// # Ok::<(), magnus::Error>(())
+/// ```
+///
+/// A struct with named fields is converted to a `Hash` with symbol keys.
+///
+/// ```
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # use serde::Serialize;
+/// #[derive(Serialize)]
+/// struct Foo<'a> {
+///     bar: u16,
+///     baz: bool,
+///     glorp: &'a str
+/// }
+///
+/// let input = Foo { bar: 1234, baz: false, glorp: "Hello, world!" };
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!(
+///     r#"
+///     output == {
+///       bar: 1234,
+///       baz: false,
+///       glorp: "Hello, world!"
+///     }
+///     "#,
+///     output
+/// )?);
 ///
 /// # Ok::<(), magnus::Error>(())
 /// ```
