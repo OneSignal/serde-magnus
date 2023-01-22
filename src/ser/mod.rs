@@ -274,12 +274,12 @@ use serde::Serialize;
 /// # let _cleanup = unsafe { magnus::embed::init() };
 /// use std::collections::HashMap;
 ///
-/// let input = HashMap::from([
-///     ("yes", "no"),
-///     ("stop", "go"),
-///     ("high", "low"),
-///     ("goodbye", "hello")
-/// ]);
+/// let mut input = HashMap::new();
+/// input.insert("yes", "no");
+/// input.insert("stop", "go");
+/// input.insert("high", "low");
+/// input.insert("goodbye", "hello");
+///
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!(
 ///     r#"
