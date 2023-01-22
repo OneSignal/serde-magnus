@@ -152,77 +152,125 @@ use serde::Serialize;
 ///
 /// ### Enums
 ///
-/// A unit enum variant (`A::Z` in the example code below) is converted to the name of the
-/// variant as a `String` (`"Z"`).
+/// ```
+/// # use serde::Serialize;
+/// #[derive(Serialize)]
+/// enum Foo<'a> {
+///     Bar,
+///     Baz(u16),
+///     Glorp(u16, bool, &'a str),
+///     Quux {
+///         frob: u16,
+///         wally: bool,
+///         plugh: &'a str
+///     }
+/// }
+/// ```
 ///
-/// All other types of enum variants (`A::Y`, `A::X`, `A::W`) are converted to a `Hash` with one
-/// key: the name of the variant as a `String` (`"Y"`', `"X"`, `"W"`).
-///
-/// For a newtype enum variant (`A::Y`), the value keyed by the variant's name is its unwrapped
-/// value.
-///
-/// For a tuple enum variant (`A::X`), the value keyed by the variant name is an `Array` containing
-/// the variant's fields.
-///
-/// For a struct enum variant (`A::W`), the value keyed by the variant name is a `Hash` with the
-/// variant's field names as `Symbol` keys.
+/// A unit enum variant is converted to the name of the variant as a `String`.
 ///
 /// ```
 /// # use magnus::{eval, Value};
-/// # use serde::Serialize;
 /// # use serde_magnus::serialize;
 /// # let _cleanup = unsafe { magnus::embed::init() };
-/// #[derive(Serialize)]
-/// enum A {
-///     Z,
-///     Y(u16),
-///     X(u16, bool, Box<A>),
-///     W {
-///         foo: u16,
-///         bar: bool,
-///         baz: Box<A>
-///     }
-/// }
+/// # use serde::Serialize;
+/// # #[derive(Serialize)]
+/// # enum Foo<'a> {
+/// #     Bar,
+/// #     Baz(u16),
+/// #     Glorp(u16, bool, &'a str),
+/// #     Quux {
+/// #         frob: u16,
+/// #         wally: bool,
+/// #         plugh: &'a str
+/// #     }
+/// # }
+/// let output: Value = serialize(&Foo::Bar)?;
+/// assert!(eval!("output == 'Bar'", output)?);
 ///
-/// let output: Value = serialize(&A::Z)?;
-/// assert!(eval!(r#"output == "Z""#, output)?);
+/// # Ok::<(), magnus::Error>(())
+/// ```
 ///
-/// let input = A::Y(1234);
+/// All other types of enum variants are converted to a `Hash` with one key: the name of the
+/// variant as a `String`.
+///
+/// For a newtype enum variant, the value keyed by the variant's name is its unwrapped value.
+///
+/// ```
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # use serde::Serialize;
+/// # #[derive(Serialize)]
+/// # enum Foo<'a> {
+/// #     Bar,
+/// #     Baz(u16),
+/// #     Glorp(u16, bool, &'a str),
+/// #     Quux {
+/// #         frob: u16,
+/// #         wally: bool,
+/// #         plugh: &'a str
+/// #     }
+/// # }
+/// let input = Foo::Baz(1234);
 /// let output: Value = serialize(&input)?;
-/// assert!(eval!(r#"output == { "Y" => 1234 }"#, output)?);
+/// assert!(eval!("output == { 'Baz' => 1234 }", output)?);
 ///
-/// let input = A::X(
-///     1234,
-///     false,
-///     Box::new(A::Y(5678))
-/// );
+/// # Ok::<(), magnus::Error>(())
+/// ```
+///
+/// For a tuple enum variant, the value keyed by the variant's name is an `Array`.
+///
+/// ```
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # use serde::Serialize;
+/// # #[derive(Serialize)]
+/// # enum Foo<'a> {
+/// #     Bar,
+/// #     Baz(u16),
+/// #     Glorp(u16, bool, &'a str),
+/// #     Quux {
+/// #         frob: u16,
+/// #         wally: bool,
+/// #         plugh: &'a str
+/// #     }
+/// # }
+/// let input = Foo::Glorp(1234, false, "Hello, world!");
+/// let output: Value = serialize(&input)?;
+/// assert!(eval!("output == { 'Glorp' => [1234, false, 'Hello, world!'] }", output)?);
+///
+/// # Ok::<(), magnus::Error>(())
+/// ```
+///
+/// For a struct enum variant, the value keyed by the variant name is a `Hash` with `Symbol` keys.
+///
+/// ```
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::serialize;
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # use serde::Serialize;
+/// # #[derive(Serialize)]
+/// # enum Foo<'a> {
+/// #     Bar,
+/// #     Baz(u16),
+/// #     Glorp(u16, bool, &'a str),
+/// #     Quux {
+/// #         frob: u16,
+/// #         wally: bool,
+/// #         plugh: &'a str
+/// #     }
+/// # }
+/// let input = Foo::Quux { frob: 1234, wally: false, plugh: "Hello, world!" };
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!(
 ///     r#"
 ///     output == {
-///       "X" => [
-///         1234,
-///         false,
-///         { "Y" => 5678 }
-///       ]
-///     }
-///     "#,
-///     output
-/// )?);
-///
-/// let input = A::W {
-///     foo: 1234,
-///     bar: false,
-///     baz: Box::new(A::Y(5678))
-/// };
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!(
-///     r#"
-///     output == {
-///       "W" => {
-///         foo: 1234,
-///         bar: false,
-///         baz: { "Y" => 5678 }
+///       "Quux" => {
+///         frob: 1234,
+///         wally: false,
+///         plugh: "Hello, world!"
 ///       }
 ///     }
 ///     "#,
