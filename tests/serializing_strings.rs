@@ -1,5 +1,5 @@
 use magnus::{encoding, encoding::EncodingCapable, Error, RString};
-use serde_bytes::Bytes;
+use serde_bytes::{Bytes, ByteBuf};
 use serde_magnus::serialize;
 
 #[test]
@@ -15,6 +15,10 @@ fn test_serializing_strings() -> Result<(), Error> {
     assert!(output.enc_get() == encoding::Index::utf8());
 
     let output: RString = serialize(Bytes::new(b"Hello, world!"))?;
+    assert_eq!(b"Hello, world!", unsafe { output.as_slice() });
+    assert!(output.enc_get() == encoding::Index::ascii8bit());
+
+    let output: RString = serialize(&ByteBuf::from(*b"Hello, world!"))?;
     assert_eq!(b"Hello, world!", unsafe { output.as_slice() });
     assert!(output.enc_get() == encoding::Index::ascii8bit());
 
