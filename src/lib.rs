@@ -3,8 +3,8 @@
 //! [Serde]: https://github.com/serde-rs/serde
 //! [Magnus]: https://github.com/matsadler/magnus
 //!
-//! The [serialize] function converts from a Rust type implementing the [serde::Serialize] trait
-//! into a Ruby equivalent.
+//! The [`serialize`] function converts from a Rust type implementing the [`serde::Serialize`]
+//! trait into a Ruby equivalent.
 //!
 //! ```
 //! use serde::{Serialize, Deserialize};
@@ -59,7 +59,7 @@
 //! # Ok::<(), magnus::Error>(())
 //! ```
 //!
-//! [deserialize] converts from a Ruby value to a Rust type implementing [serde::Deserialize].
+//! [`deserialize`] converts from a Ruby value to a Rust type implementing [`serde::Deserialize`].
 //!
 //! ```
 //! # use serde::Deserialize;
