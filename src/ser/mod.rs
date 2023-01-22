@@ -282,7 +282,8 @@ use serde::Serialize;
 ///
 /// ### Compound types
 ///
-/// A compound type such as a tuple `(T1, T2, T3, ...)` or array `[T]` is converted to an `Array`.
+/// A compound type such as a tuple `(T1, T2, T3, ...)`, array `[T; N]`, or slice `[T]` is
+/// converted to an `Array`.
 ///
 /// ```
 /// # use magnus::{eval, Value};
