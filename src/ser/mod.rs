@@ -35,16 +35,17 @@ use serde::Serialize;
 /// | `&[u8]`                   | A `String` with ASCII-8BIT encoding |
 ///
 /// ```
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// use magnus::{eval, Value};
 /// use serde_magnus::serialize;
-/// # let _cleanup = unsafe { magnus::embed::init() };
 ///
 /// let output: Value = serialize(&1234)?;
 /// assert!(eval!("output == 1234", output)?);
 ///
 /// let output: Value = serialize("Hello, world!")?;
 /// assert!(eval!("output == 'Hello, world!'", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -55,7 +56,9 @@ use serde::Serialize;
 /// ```
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
+/// #
 /// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// let input: Option<u64> = None;
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == nil", output)?);
@@ -63,7 +66,7 @@ use serde::Serialize;
 /// let input: Option<u64> = Some(1234);
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == 1234", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -74,7 +77,9 @@ use serde::Serialize;
 /// ```
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
+/// #
 /// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// let input: Result<u64, &str> = Ok(1234);
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == { 'Ok' => 1234 }", output)?);
@@ -82,7 +87,7 @@ use serde::Serialize;
 /// let input: Result<u64, &str> = Err("something went wrong");
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == { 'Err' => 'something went wrong' }", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -93,7 +98,9 @@ use serde::Serialize;
 /// ```
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
+/// #
 /// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// use serde::Serialize;
 ///
 /// #[derive(Serialize)]
@@ -101,7 +108,7 @@ use serde::Serialize;
 ///
 /// let output: Value = serialize(&Foo)?;
 /// assert!(eval!("output == nil", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -109,16 +116,18 @@ use serde::Serialize;
 ///
 /// ```
 /// # use magnus::{eval, Value};
-/// # use serde_magnus::serialize;
-/// # let _cleanup = unsafe { magnus::embed::init() };
 /// # use serde::Serialize;
+/// # use serde_magnus::serialize;
+/// #
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// #[derive(Serialize)]
 /// struct Foo(u16);
 ///
 /// let input = Foo(1234);
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == 1234", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -126,16 +135,18 @@ use serde::Serialize;
 ///
 /// ```
 /// # use magnus::{eval, Value};
-/// # use serde_magnus::serialize;
-/// # let _cleanup = unsafe { magnus::embed::init() };
 /// # use serde::Serialize;
+/// # use serde_magnus::serialize;
+/// #
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// #[derive(Serialize)]
 /// struct Foo<'a>(u16, bool, &'a str);
 ///
 /// let input = Foo(1234, false, "Hello, world!");
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == [1234, false, 'Hello, world!']", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -143,9 +154,11 @@ use serde::Serialize;
 ///
 /// ```
 /// # use magnus::{eval, Value};
-/// # use serde_magnus::serialize;
-/// # let _cleanup = unsafe { magnus::embed::init() };
 /// # use serde::Serialize;
+/// # use serde_magnus::serialize;
+/// #
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// #[derive(Serialize)]
 /// struct Foo<'a> {
 ///     bar: u16,
@@ -165,7 +178,7 @@ use serde::Serialize;
 ///     "#,
 ///     output
 /// )?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -173,6 +186,7 @@ use serde::Serialize;
 ///
 /// ```
 /// # use serde::Serialize;
+/// #
 /// #[derive(Serialize)]
 /// enum Foo<'a> {
 ///     Bar,
@@ -190,9 +204,11 @@ use serde::Serialize;
 ///
 /// ```
 /// # use magnus::{eval, Value};
-/// # use serde_magnus::serialize;
-/// # let _cleanup = unsafe { magnus::embed::init() };
 /// # use serde::Serialize;
+/// # use serde_magnus::serialize;
+/// #
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// # #[derive(Serialize)]
 /// # enum Foo<'a> {
 /// #     Bar,
@@ -204,9 +220,10 @@ use serde::Serialize;
 /// #         plugh: &'a str
 /// #     }
 /// # }
+/// #
 /// let output: Value = serialize(&Foo::Bar)?;
 /// assert!(eval!("output == 'Bar'", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -217,9 +234,11 @@ use serde::Serialize;
 ///
 /// ```
 /// # use magnus::{eval, Value};
-/// # use serde_magnus::serialize;
-/// # let _cleanup = unsafe { magnus::embed::init() };
 /// # use serde::Serialize;
+/// # use serde_magnus::serialize;
+/// #
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// # #[derive(Serialize)]
 /// # enum Foo<'a> {
 /// #     Bar,
@@ -231,10 +250,11 @@ use serde::Serialize;
 /// #         plugh: &'a str
 /// #     }
 /// # }
+/// #
 /// let input = Foo::Baz(1234);
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == { 'Baz' => 1234 }", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -242,9 +262,11 @@ use serde::Serialize;
 ///
 /// ```
 /// # use magnus::{eval, Value};
-/// # use serde_magnus::serialize;
-/// # let _cleanup = unsafe { magnus::embed::init() };
 /// # use serde::Serialize;
+/// # use serde_magnus::serialize;
+/// #
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// # #[derive(Serialize)]
 /// # enum Foo<'a> {
 /// #     Bar,
@@ -256,10 +278,11 @@ use serde::Serialize;
 /// #         plugh: &'a str
 /// #     }
 /// # }
+/// #
 /// let input = Foo::Glorp(1234, false, "Hello, world!");
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == { 'Glorp' => [1234, false, 'Hello, world!'] }", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -267,9 +290,11 @@ use serde::Serialize;
 ///
 /// ```
 /// # use magnus::{eval, Value};
-/// # use serde_magnus::serialize;
-/// # let _cleanup = unsafe { magnus::embed::init() };
 /// # use serde::Serialize;
+/// # use serde_magnus::serialize;
+/// #
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// # #[derive(Serialize)]
 /// # enum Foo<'a> {
 /// #     Bar,
@@ -281,6 +306,7 @@ use serde::Serialize;
 /// #         plugh: &'a str
 /// #     }
 /// # }
+/// #
 /// let input = Foo::Quux { frob: 1234, wally: false, plugh: "Hello, world!" };
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!(
@@ -295,7 +321,7 @@ use serde::Serialize;
 ///     "#,
 ///     output
 /// )?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -307,7 +333,9 @@ use serde::Serialize;
 /// ```
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
+/// #
 /// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// let input = (123, false, "Hello, world!");
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == [123, false, 'Hello, world!']", output)?);
@@ -315,7 +343,7 @@ use serde::Serialize;
 /// let input = [123, 456, 789];
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == [123, 456, 789]", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -326,11 +354,13 @@ use serde::Serialize;
 /// ```
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
+/// #
 /// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// let input = vec![123, 456, 789];
 /// let output: Value = serialize(&input)?;
 /// assert!(eval!("output == [123, 456, 789]", output)?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 ///
@@ -339,7 +369,9 @@ use serde::Serialize;
 /// ```
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
+/// #
 /// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
 /// use std::collections::HashMap;
 ///
 /// let mut input = HashMap::new();
@@ -360,7 +392,7 @@ use serde::Serialize;
 ///     "#,
 ///     output
 /// )?);
-///
+/// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
 pub fn serialize<Input, Output>(input: &Input) -> Result<Output, Error>

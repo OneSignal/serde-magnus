@@ -1,3 +1,5 @@
+#![doc(test(attr(warn(unused))))]
+
 //! `serde_magnus` converts between Rust and Ruby data structures using [Serde] and [Magnus].
 //!
 //! [Serde]: https://github.com/serde-rs/serde
@@ -7,10 +9,11 @@
 //! trait into a Ruby equivalent.
 //!
 //! ```
+//! # let _cleanup = unsafe { magnus::embed::init() };
+//! #
 //! use serde::{Serialize, Deserialize};
 //! use magnus::{eval, Value};
 //! use serde_magnus::serialize;
-//! # let _cleanup = unsafe { magnus::embed::init() };
 //!
 //! #[derive(Serialize, Deserialize, PartialEq, Debug)]
 //! struct Post {
@@ -55,7 +58,7 @@
 //!     "#,
 //!     post
 //! )?);
-//!
+//! #
 //! # Ok::<(), magnus::Error>(())
 //! ```
 //!
@@ -64,6 +67,7 @@
 //! ```
 //! # use serde::Deserialize;
 //! # use magnus::{eval, RHash};
+//! #
 //! # let _cleanup = unsafe { magnus::embed::init() };
 //! #
 //! # #[derive(Deserialize, PartialEq, Debug)]
@@ -79,6 +83,7 @@
 //! #     name: String,
 //! #     email_address: String
 //! # }
+//! #
 //! use serde_magnus::deserialize;
 //!
 //! let post: RHash = eval!(r#"
@@ -110,7 +115,7 @@
 //!     },
 //!     post
 //! );
-//!
+//! #
 //! # Ok::<(), magnus::Error>(())
 //! ```
 
