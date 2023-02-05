@@ -1,6 +1,7 @@
 mod deserializer;
 
 mod array_deserializer;
+mod arrays;
 mod enum_deserializer;
 mod hash_deserializer;
 mod variant_deserializer;
@@ -188,11 +189,11 @@ use std::ops::Deref;
 /// use serde::Deserialize;
 ///
 /// #[derive(PartialEq, Debug, Deserialize)]
-/// struct Foo(u16, u16, u16);
+/// struct Foo(u16, bool, String);
 ///
-/// let input: Value = eval!("[123, 456, 789]")?;
+/// let input: Value = eval!("[123, true, 'Hello, world!']")?;
 /// let output: Foo = deserialize(&input)?;
-/// assert_eq!(Foo(123, 456, 789), output);
+/// assert_eq!(Foo(123, true, "Hello, world!".into()), output);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -231,7 +232,7 @@ use std::ops::Deref;
 /// enum Foo {
 ///     Bar,
 ///     Baz(u16),
-///     Glorp(u16, u16, u16),
+///     Glorp(u16, bool, String),
 ///     Quux {
 ///         frob: u16,
 ///         wally: bool,
@@ -250,16 +251,7 @@ use std::ops::Deref;
 /// # let _cleanup = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(PartialEq, Debug, Deserialize)]
-/// # enum Foo {
-/// #     Bar,
-/// #     Baz(u16),
-/// #     Glorp(u16, u16, u16),
-/// #     Quux {
-/// #         frob: u16,
-/// #         wally: bool,
-/// #         plugh: String
-/// #     }
-/// # }
+/// # enum Foo { Bar }
 /// #
 /// let input: Value = eval!("'Bar'")?;
 /// let output: Foo = deserialize(&input)?;
@@ -278,16 +270,7 @@ use std::ops::Deref;
 /// # let _cleanup = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(PartialEq, Debug, Deserialize)]
-/// # enum Foo {
-/// #     Bar,
-/// #     Baz(u16),
-/// #     Glorp(u16, u16, u16),
-/// #     Quux {
-/// #         frob: u16,
-/// #         wally: bool,
-/// #         plugh: String
-/// #     }
-/// # }
+/// # enum Foo { Baz(u16) }
 /// #
 /// let input: Value = eval!("{ 'Baz' => 1234 }")?;
 /// let output: Foo = deserialize(&input)?;
@@ -306,20 +289,11 @@ use std::ops::Deref;
 /// # let _cleanup = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(PartialEq, Debug, Deserialize)]
-/// # enum Foo {
-/// #     Bar,
-/// #     Baz(u16),
-/// #     Glorp(u16, u16, u16),
-/// #     Quux {
-/// #         frob: u16,
-/// #         wally: bool,
-/// #         plugh: String
-/// #     }
-/// # }
+/// # enum Foo { Glorp(u16, bool, String) }
 /// #
-/// let input: Value = eval!("{ 'Glorp' => [123, 456, 789] }")?;
+/// let input: Value = eval!("{ 'Glorp' => [123, true, 'Hello, world!'] }")?;
 /// let output: Foo = deserialize(&input)?;
-/// assert_eq!(Foo::Glorp(123, 456, 789), output);
+/// assert_eq!(Foo::Glorp(123, true, "Hello, world!".into()), output);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -335,9 +309,6 @@ use std::ops::Deref;
 /// #
 /// # #[derive(PartialEq, Debug, Deserialize)]
 /// # enum Foo {
-/// #     Bar,
-/// #     Baz(u16),
-/// #     Glorp(u16, u16, u16),
 /// #     Quux {
 /// #         frob: u16,
 /// #         wally: bool,
@@ -364,6 +335,23 @@ use std::ops::Deref;
 /// ```
 ///
 /// ### Compound types
+///
+/// #### Tuples
+///
+/// ```
+/// # use magnus::{eval, Value};
+/// # use serde_magnus::deserialize;
+/// #
+/// # let _cleanup = unsafe { magnus::embed::init() };
+/// #
+/// let input: Value = eval!("[123, true, 'Hello, world!']")?;
+/// let output: (i16, bool, String) = deserialize(&input)?;
+/// assert_eq!((123, true, "Hello, world!".into()), output);
+/// #
+/// # Ok::<(), magnus::Error>(())
+/// ```
+///
+/// #### Arrays
 ///
 /// ```
 /// # use magnus::{eval, Value};

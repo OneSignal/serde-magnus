@@ -1,16 +1,16 @@
-use super::Deserializer;
+use super::{arrays::ArrayEnumerator, Deserializer};
 use crate::error::Error;
-use magnus::{Enumerator, RArray};
+use magnus::RArray;
 use serde::de::{DeserializeSeed, SeqAccess};
 
 pub struct ArrayDeserializer {
-    entries: Enumerator,
+    entries: ArrayEnumerator,
 }
 
 impl ArrayDeserializer {
     pub fn new(array: RArray) -> ArrayDeserializer {
         ArrayDeserializer {
-            entries: array.each(),
+            entries: ArrayEnumerator::new(array),
         }
     }
 }
@@ -24,7 +24,7 @@ impl<'i> SeqAccess<'i> for ArrayDeserializer {
     {
         match self.entries.next() {
             Some(Ok(entry)) => seed.deserialize(Deserializer::new(entry)).map(Some),
-            Some(Err(error)) => Err(Error::from(error)),
+            Some(Err(error)) => Err(error.into()),
             None => Ok(None),
         }
     }

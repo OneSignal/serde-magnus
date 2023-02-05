@@ -1,4 +1,4 @@
-use magnus::{Error, Integer, RArray, QNIL};
+use magnus::{Error, Integer, RArray, RString, QNIL, QTRUE};
 use serde_magnus::deserialize;
 
 #[test]
@@ -8,12 +8,12 @@ fn test_deserializing_tuples() -> Result<(), Error> {
     assert_eq!((), deserialize(QNIL)?);
 
     let input: RArray = RArray::new();
-    input.push(Integer::from_i64(1))?;
-    input.push(Integer::from_i64(2))?;
-    input.push(Integer::from_i64(3))?;
+    input.push(Integer::from_i64(123))?;
+    input.push(QTRUE)?;
+    input.push(RString::from("Hello, world!"))?;
 
-    let output: (i64, i64, i64) = deserialize(input)?;
-    assert_eq!((1, 2, 3), output);
+    let output: (i64, bool, String) = deserialize(input)?;
+    assert_eq!((123, true, "Hello, world!".into()), output);
 
     Ok(())
 }
