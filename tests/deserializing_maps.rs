@@ -1,4 +1,4 @@
-use magnus::{Error, RHash};
+use magnus::{eval, Error, RHash};
 use serde_magnus::deserialize;
 use std::collections::HashMap;
 
@@ -6,10 +6,15 @@ use std::collections::HashMap;
 fn test_deserializing_maps() -> Result<(), Error> {
     let _cleanup = unsafe { magnus::embed::init() };
 
-    let input: RHash = RHash::new();
-    input.aset("Yes", "No")?;
-    input.aset("Stop", "Go")?;
-    input.aset("High", "Low")?;
+    let input: RHash = eval!(
+        r#"
+        {
+          "Yes" => "No",
+          "Stop" => "Go",
+          "High" => "Low"
+        }
+    "#
+    )?;
 
     let output: HashMap<String, String> = deserialize(input)?;
     assert_eq!(3, output.len());

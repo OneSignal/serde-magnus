@@ -1,4 +1,4 @@
-use magnus::{Error, Integer, RHash, RString, Symbol};
+use magnus::{eval, Error, RHash, RString};
 use serde::Serialize;
 use serde_magnus::serialize;
 
@@ -6,7 +6,8 @@ use serde_magnus::serialize;
 enum A {
     A,
     B(u64),
-    C { message: String },
+    C(u64, bool, String),
+    D { message: String },
 }
 
 #[test]
@@ -14,24 +15,27 @@ fn test_serializing_enums() -> Result<(), Error> {
     let _cleanup = unsafe { magnus::embed::init() };
 
     let output: RString = serialize(&A::A)?;
-    assert_eq!("A", output.to_string()?);
+    assert!(eval!("output == 'A'", output)?);
 
-    let output: RHash = serialize(&A::B(123))?;
-    assert_eq!(1, output.len());
+    let input = A::B(123);
+    let output: RHash = serialize(&input)?;
+    assert!(eval!("output == { 'B' => 123 }", output)?);
 
-    let value: Integer = output.lookup("B")?;
-    assert_eq!(123, value.to_u64()?);
+    let input = A::C(123, true, "Hello, world!".into());
+    let output: RHash = serialize(&input)?;
+    assert!(eval!(
+        "output == { 'C' => [ 123, true, 'Hello, world!' ] }",
+        output
+    )?);
 
-    let output: RHash = serialize(&A::C {
+    let input = A::D {
         message: "Hello, world!".into(),
-    })?;
-    assert_eq!(1, output.len());
-
-    let value: RHash = output.lookup("C")?;
-    assert_eq!(1, value.len());
-
-    let message: RString = value.lookup(Symbol::new("message"))?;
-    assert_eq!("Hello, world!", message.to_string()?);
+    };
+    let output: RHash = serialize(&input)?;
+    assert!(eval!(
+        "output == { 'D' => { message: 'Hello, world!' } }",
+        output
+    )?);
 
     Ok(())
 }

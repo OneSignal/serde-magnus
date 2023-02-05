@@ -1,4 +1,4 @@
-use magnus::{Error, Integer, RHash, RString, Symbol, Value};
+use magnus::{eval, Error, Integer, RArray, RHash, Value};
 use serde::Serialize;
 use serde_magnus::serialize;
 
@@ -9,7 +9,10 @@ struct A;
 struct B(u64);
 
 #[derive(Serialize)]
-struct C {
+struct C(u64, bool, String);
+
+#[derive(Serialize)]
+struct D {
     message: String,
 }
 
@@ -20,16 +23,19 @@ fn test_serializing_structs() -> Result<(), Error> {
     let output: Value = serialize(&A)?;
     assert!(output.is_nil());
 
-    let output: Integer = serialize(&B(123))?;
+    let input = B(123);
+    let output: Integer = serialize(&input)?;
     assert_eq!(123, output.to_u64()?);
 
-    let output: RHash = serialize(&C {
-        message: "Hello, world!".into(),
-    })?;
-    assert_eq!(1, output.len());
+    let input = C(1234, true, "Hello, world!".into());
+    let output: RArray = serialize(&input)?;
+    assert!(eval!("output == [ 1234, true, 'Hello, world!' ]", output)?);
 
-    let message: RString = output.lookup(Symbol::new("message"))?;
-    assert_eq!("Hello, world!", message.to_string()?);
+    let input = D {
+        message: "Hello, world!".into(),
+    };
+    let output: RHash = serialize(&input)?;
+    assert!(eval!("output == { message: 'Hello, world!' }", output)?);
 
     Ok(())
 }

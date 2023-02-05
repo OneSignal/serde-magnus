@@ -1,4 +1,4 @@
-use magnus::{Error, RArray, RHash, RString, Symbol};
+use magnus::{eval, Error, RHash, RString};
 use serde::Deserialize;
 use serde_magnus::deserialize;
 
@@ -18,29 +18,15 @@ fn test_deserializing_enums() -> Result<(), Error> {
     let output: A = deserialize(input)?;
     assert_eq!(A::A, output);
 
-    let input = RHash::new();
-    input.aset("B", 123)?;
-
+    let input: RHash = eval!("{ 'B' => 123 }")?;
     let output: A = deserialize(input)?;
     assert_eq!(A::B(123), output);
 
-    let value = RArray::new();
-    value.push(1234)?;
-    value.push(true)?;
-    value.push("Hello, world!")?;
-
-    let input = RHash::new();
-    input.aset("C", value)?;
-
+    let input: RHash = eval!("{ 'C' => [1234, true, 'Hello, world!'] }")?;
     let output: A = deserialize(input).unwrap();
     assert_eq!(A::C(1234, true, "Hello, world!".into()), output);
 
-    let value = RHash::new();
-    value.aset(Symbol::new("message"), "Hello, world!")?;
-
-    let input = RHash::new();
-    input.aset("D", value)?;
-
+    let input: RHash = eval!("{ 'D' => { message: 'Hello, world!' } }")?;
     let output: A = deserialize(input)?;
     assert_eq!(
         A::D {

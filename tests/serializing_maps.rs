@@ -1,4 +1,4 @@
-use magnus::{Error, RHash, RString};
+use magnus::{eval, Error, RHash};
 use serde_magnus::serialize;
 use std::collections::HashMap;
 
@@ -12,16 +12,17 @@ fn test_serializing_maps() -> Result<(), Error> {
     input.insert("High", "Low");
 
     let output: RHash = serialize(&input)?;
-    assert_eq!(3, output.len());
 
-    let value: RString = output.lookup("Yes")?;
-    assert_eq!("No", value.to_string()?);
-
-    let value: RString = output.lookup("Stop")?;
-    assert_eq!("Go", value.to_string()?);
-
-    let value: RString = output.lookup("High")?;
-    assert_eq!("Low", value.to_string()?);
+    assert!(eval!(
+        r#"
+            output == {
+              "Yes" => "No",
+              "Stop" => "Go",
+              "High" => "Low"
+            }
+        "#,
+        output
+    )?);
 
     Ok(())
 }

@@ -1,4 +1,4 @@
-use magnus::{Error, Integer, RArray, RHash, RString, Symbol, QNIL, QTRUE};
+use magnus::{eval, Error, Integer, RArray, RHash, QNIL};
 use serde::Deserialize;
 use serde_magnus::deserialize;
 
@@ -26,17 +26,11 @@ fn test_deserializing_structs() -> Result<(), Error> {
     let output: B = deserialize(input)?;
     assert_eq!(B(123), output);
 
-    let input = RArray::new();
-    input.push(Integer::from_u64(123))?;
-    input.push(QTRUE)?;
-    input.push(RString::from("Hello, world!"))?;
-
+    let input: RArray = eval!("[ 123, true, 'Hello, world!' ]")?;
     let output: C = deserialize(input)?;
     assert_eq!(C(123, true, "Hello, world!".into()), output);
 
-    let input = RHash::new();
-    input.aset(Symbol::new("message"), "Hello, world!")?;
-
+    let input: RHash = eval!("{ message: 'Hello, world!' }")?;
     let output: D = deserialize(input)?;
     assert_eq!(
         D {
