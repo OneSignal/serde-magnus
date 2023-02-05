@@ -50,11 +50,11 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
         }
 
         if let Some(string) = RString::from_value(self.value) {
-            return visitor.visit_string(string.to_string()?);
+            return visitor.visit_str(string.to_string()?.as_str());
         }
 
         if let Some(symbol) = Symbol::from_value(self.value) {
-            return visitor.visit_string(symbol.name()?.to_string());
+            return visitor.visit_str(symbol.name()?.to_string().as_str());
         }
 
         if let Some(array) = RArray::from_value(self.value) {
@@ -71,16 +71,6 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
                 "can't deserialize {}",
                 unsafe { self.value.classname() }.into_owned()
             ),
-        ))
-    }
-
-    fn deserialize_str<Visitor>(self, _visitor: Visitor) -> Result<Visitor::Value, Self::Error>
-    where
-        Visitor: serde::de::Visitor<'i>,
-    {
-        Err(Error::new(
-            exception::type_error(),
-            "can't deserialize into borrowed string",
         ))
     }
 
@@ -185,7 +175,7 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
 
     forward_to_deserialize_any! {
         <Visitor: Visitor<'i>>
-        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char string
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
         unit unit_struct seq tuple tuple_struct map struct identifier
     }
 }
