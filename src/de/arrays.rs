@@ -8,7 +8,7 @@ use tap::TapFallible;
 /// #<FiberError: fiber called across stack rewinding barrier>
 /// ```
 ///
-/// This was fixed by [ruby/ruby#4606](https://github.com/ruby/ruby/pull/4606).
+/// See [matsadler/magnus#55](https://github.com/matsadler/magnus/issues/55).
 ///
 /// To appease older Rubies, step through an array by index rather than using a Ruby `Enumerator`.
 ///
