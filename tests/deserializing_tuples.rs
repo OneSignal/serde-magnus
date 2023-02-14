@@ -8,7 +8,7 @@ fn test_deserializing_tuples() -> Result<(), Error> {
     // From nil
     assert_eq!((), deserialize(QNIL)?);
 
-    // From a homegeneous array
+    // From a homogeneous array
     let input: RArray = eval!("[ 123, 456, 789 ]")?;
     let output: (i64, i64, i64) = deserialize(input)?;
     assert_eq!((123, 456, 789), output);
