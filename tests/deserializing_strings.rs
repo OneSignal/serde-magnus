@@ -11,7 +11,7 @@ fn test_deserializing_strings() -> Result<(), Error> {
 
     let output: Result<&str, Error> = deserialize(RString::new("Hello, world!"));
     assert_eq!(
-        r#"RuntimeError: invalid type: string "Hello, world!", expected a borrowed string"#,
+        r#"TypeError: invalid type: expected a borrowed string, got string "Hello, world!""#,
         output.unwrap_err().to_string()
     );
 

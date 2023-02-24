@@ -41,6 +41,13 @@ impl serde::de::Error for Error {
     {
         Error::new(exception::runtime_error(), message.to_string())
     }
+
+    fn invalid_type(unexpected: serde::de::Unexpected, expected: &dyn serde::de::Expected) -> Self {
+        Error::new(
+            exception::type_error(),
+            format!("invalid type: expected {}, got {}", expected, unexpected),
+        )
+    }
 }
 
 impl From<magnus::Error> for Error {

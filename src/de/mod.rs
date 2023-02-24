@@ -431,7 +431,7 @@ use std::ops::Deref;
 /// let output: Result<&str, Error> = deserialize(&input);
 /// assert!(output.is_err());
 /// assert_eq!(
-///    r#"RuntimeError: invalid type: string "Hello, world!", expected a borrowed string"#,
+///    r#"TypeError: invalid type: expected a borrowed string, got string "Hello, world!""#,
 ///    output.unwrap_err().to_string()
 /// );
 /// #
