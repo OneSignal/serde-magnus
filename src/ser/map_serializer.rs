@@ -39,6 +39,6 @@ impl SerializeMap for MapSerializer {
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(self.hash.into())
+        Ok(*self.hash)
     }
 }

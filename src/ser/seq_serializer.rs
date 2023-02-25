@@ -30,7 +30,7 @@ impl SerializeSeq for SeqSerializer {
     }
 
     fn end(self) -> Result<Self::Ok, self::Error> {
-        Ok(self.array.into())
+        Ok(*self.array)
     }
 }
 

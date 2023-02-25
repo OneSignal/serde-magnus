@@ -74,7 +74,7 @@ impl serde::Serializer for Serializer {
     }
 
     fn serialize_bytes(self, value: &[u8]) -> Result<Self::Ok, Self::Error> {
-        Ok(RString::from_slice(value).into())
+        Ok(*RString::from_slice(value))
     }
 
     fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
