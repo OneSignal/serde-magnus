@@ -15,7 +15,7 @@ categories = ["development-tools::ffi"]
 exclude = [".gitignore", ".github"]
 
 [dependencies]
-serde = "1.0"
+serde = "1.0, <= 1.0.156"
 magnus = "0.5"
 tap = "1.0"
 
