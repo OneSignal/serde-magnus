@@ -2,17 +2,8 @@ use magnus::{exception, Error, RArray, Value};
 use std::convert::TryInto;
 use tap::TapFallible;
 
-/// For a heterogeneous array, [`magnus::Enumerator::next`] returns an error on Ruby < 3.0:
-///
-/// ```text
-/// #<FiberError: fiber called across stack rewinding barrier>
-/// ```
-///
-/// See [matsadler/magnus#55](https://github.com/matsadler/magnus/issues/55).
-///
-/// To appease older Rubies, step through an array by index rather than using a Ruby `Enumerator`.
-///
-/// TODO: remove this when dropping support for Ruby 2.7.
+/// For our purposes, stepping through an array by index is faster than `magnus::Enumerator`.
+/// This is due to the fiber overhead of Ruby enumerators.
 pub struct ArrayEnumerator {
     array: RArray,
     index: isize,
@@ -23,7 +14,7 @@ impl ArrayEnumerator {
         ArrayEnumerator { array, index: 0 }
     }
 
-    fn peek(&self) -> Result<Option<Value>, Error> {
+    fn current(&self) -> Result<Option<Value>, Error> {
         if let Ok(len) = self.array.len().try_into() {
             if self.index < len {
                 self.array.entry(self.index).map(Some)
@@ -43,7 +34,7 @@ impl Iterator for ArrayEnumerator {
     type Item = Result<Value, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.peek()
+        self.current()
             .tap_ok(|item| {
                 if item.is_some() {
                     self.index += 1

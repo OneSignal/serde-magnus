@@ -1,7 +1,7 @@
 mod deserializer;
 
 mod array_deserializer;
-mod arrays;
+mod array_enumerator;
 mod enum_deserializer;
 mod hash_deserializer;
 mod variant_deserializer;

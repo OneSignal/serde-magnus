@@ -1,4 +1,4 @@
-use super::{arrays::ArrayEnumerator, Deserializer};
+use super::{array_enumerator::ArrayEnumerator, Deserializer};
 use crate::error::Error;
 use magnus::RArray;
 use serde::de::{DeserializeSeed, SeqAccess};

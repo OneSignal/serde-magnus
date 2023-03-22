@@ -1,12 +1,12 @@
-use super::Deserializer;
+use super::{array_enumerator::ArrayEnumerator, Deserializer};
 use crate::error::Error;
-use magnus::{exception, Enumerator, RArray, RHash};
+use magnus::{exception, RArray, RHash};
 use serde::de::{DeserializeSeed, MapAccess};
 use std::iter::Peekable;
 
 pub struct HashDeserializer {
     hash: RHash,
-    keys: Peekable<Enumerator>,
+    keys: Peekable<ArrayEnumerator>,
 }
 
 impl HashDeserializer {
@@ -14,7 +14,7 @@ impl HashDeserializer {
         hash.funcall("keys", ())
             .map(|keys: RArray| HashDeserializer {
                 hash,
-                keys: keys.each().peekable(),
+                keys: ArrayEnumerator::new(keys).peekable(),
             })
             .map_err(Into::into)
     }
