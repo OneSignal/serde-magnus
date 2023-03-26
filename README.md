@@ -8,7 +8,7 @@
 **Quick links**
 
 * [API documentation](https://docs.rs/serde_magnus)
-* [Releases/changelog](https://github.com/georgeclaghorn/serde_magnus/releases)
+* [Releases/changelog](https://github.com/georgeclaghorn/serde-magnus/releases)
 * [`serde_magnus` on crates.io](https://crates.io/crates/serde_magnus)
 
 ## Usage
