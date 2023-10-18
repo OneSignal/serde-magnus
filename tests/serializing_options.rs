@@ -1,4 +1,4 @@
-use magnus::{Error, Integer, Value};
+use magnus::{value::ReprValue, Error, Integer, Value};
 use serde_magnus::serialize;
 
 #[test]

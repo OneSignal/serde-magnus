@@ -1,4 +1,4 @@
-use magnus::{eval, Error, RArray, Value};
+use magnus::{eval, value::ReprValue, Error, RArray, Value};
 use serde_magnus::serialize;
 
 #[test]

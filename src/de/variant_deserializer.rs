@@ -1,6 +1,6 @@
 use super::{ArrayDeserializer, Deserializer, HashDeserializer};
 use crate::error::Error;
-use magnus::{RArray, RHash, Value};
+use magnus::{value::ReprValue, RArray, RHash, Value};
 use serde::de::{DeserializeSeed, Unexpected, VariantAccess};
 
 pub struct VariantDeserializer {

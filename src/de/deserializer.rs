@@ -1,8 +1,9 @@
 use magnus::{
     exception,
-    value::{Qfalse, Qtrue},
+    value::{qnil, Qfalse, Qtrue, ReprValue},
     Fixnum, Float, RArray, RBignum, RHash, RString, Symbol, Value,
 };
+
 use serde::forward_to_deserialize_any;
 
 use super::{ArrayDeserializer, EnumDeserializer, HashDeserializer};
@@ -124,7 +125,7 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
         if let Some(variant) = RString::from_value(self.value) {
             return visitor.visit_enum(EnumDeserializer::new(
                 variant.to_string()?,
-                Value::default(),
+                qnil().as_value(),
             ));
         }
 
@@ -132,7 +133,7 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
             if hash.len() == 1 {
                 let keys: RArray = hash.funcall("keys", ())?;
                 let key: String = keys.entry(0)?;
-                let value = hash.get(key.as_str()).unwrap_or_default();
+                let value = hash.get(key.as_str()).unwrap_or_else(|| qnil().as_value());
 
                 return visitor.visit_enum(EnumDeserializer::new(key, value));
             } else {

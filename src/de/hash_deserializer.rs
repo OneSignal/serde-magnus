@@ -1,6 +1,6 @@
 use super::{array_enumerator::ArrayEnumerator, Deserializer};
 use crate::error::Error;
-use magnus::{exception, RHash};
+use magnus::{exception, value::ReprValue, RHash};
 use serde::de::{DeserializeSeed, MapAccess};
 use std::iter::Peekable;
 

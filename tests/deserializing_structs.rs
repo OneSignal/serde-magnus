@@ -1,4 +1,4 @@
-use magnus::{eval, Error, Integer, RArray, RHash, QNIL};
+use magnus::{eval, value::qnil, Error, Integer, IntoValue, RArray, RHash};
 use serde::Deserialize;
 use serde_magnus::deserialize;
 
@@ -20,7 +20,7 @@ struct D {
 fn test_deserializing_structs() -> Result<(), Error> {
     let _cleanup = unsafe { magnus::embed::init() };
 
-    assert_eq!(A, deserialize(QNIL)?);
+    assert_eq!(A, deserialize(qnil().into_value())?);
 
     let input = Integer::from_u64(123);
     let output: B = deserialize(input)?;

@@ -1,6 +1,6 @@
 use super::Serializer;
 use crate::error::Error;
-use magnus::{RArray, Value};
+use magnus::{IntoValue, RArray, Value};
 use serde::{
     ser::{SerializeSeq, SerializeTuple, SerializeTupleStruct},
     Serialize,
@@ -30,7 +30,7 @@ impl SerializeSeq for SeqSerializer {
     }
 
     fn end(self) -> Result<Self::Ok, self::Error> {
-        Ok(*self.array)
+        Ok(self.array.into_value())
     }
 }
 
