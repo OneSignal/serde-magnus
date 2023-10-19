@@ -11,7 +11,7 @@ jobs:
       matrix:
         rustup-toolchain:
           - stable
-          - "1.61"
+          - "1.65"
         ruby-version:
           - "3.0"
           - "3.1"
