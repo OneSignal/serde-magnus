@@ -400,8 +400,5 @@ where
     Input: Serialize + ?Sized,
     Output: TryConvert,
 {
-    input
-        .serialize(Serializer)?
-        .try_convert()
-        .map_err(Into::into)
+    TryConvert::try_convert(input.serialize(Serializer)?).map_err(Into::into)
 }

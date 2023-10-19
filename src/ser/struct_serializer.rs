@@ -1,6 +1,6 @@
 use super::Serializer;
 use crate::error::Error;
-use magnus::{RHash, Symbol, Value};
+use magnus::{IntoValue, RHash, Symbol, Value};
 use serde::{ser::SerializeStruct, Serialize};
 
 pub struct StructSerializer {
@@ -31,6 +31,6 @@ impl SerializeStruct for StructSerializer {
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(*self.hash)
+        Ok(self.hash.into_value())
     }
 }

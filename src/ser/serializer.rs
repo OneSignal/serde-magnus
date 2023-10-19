@@ -1,4 +1,4 @@
-use magnus::{RArray, RHash, RString, Value};
+use magnus::{IntoValue, RArray, RHash, RString, Value};
 use serde::Serialize;
 
 use super::{
@@ -22,63 +22,63 @@ impl serde::Serializer for Serializer {
     type SerializeStructVariant = StructVariantSerializer;
 
     fn serialize_bool(self, value: bool) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_i8(self, value: i8) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_i16(self, value: i16) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_i32(self, value: i32) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_i64(self, value: i64) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_u8(self, value: u8) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_u16(self, value: u16) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_u32(self, value: u32) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_u64(self, value: u64) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_f32(self, value: f32) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_f64(self, value: f64) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_char(self, value: char) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_str(self, value: &str) -> Result<Self::Ok, Self::Error> {
-        Ok(value.into())
+        Ok(value.into_value())
     }
 
     fn serialize_bytes(self, value: &[u8]) -> Result<Self::Ok, Self::Error> {
-        Ok(*RString::from_slice(value))
+        Ok(RString::from_slice(value).into_value())
     }
 
     fn serialize_none(self) -> Result<Self::Ok, Self::Error> {
-        Ok(().into())
+        Ok(().into_value())
     }
 
     fn serialize_some<Value>(self, value: &Value) -> Result<Self::Ok, Self::Error>
@@ -89,11 +89,11 @@ impl serde::Serializer for Serializer {
     }
 
     fn serialize_unit(self) -> Result<Self::Ok, Self::Error> {
-        Ok(().into())
+        Ok(().into_value())
     }
 
     fn serialize_unit_struct(self, _name: &'static str) -> Result<Self::Ok, Self::Error> {
-        Ok(().into())
+        Ok(().into_value())
     }
 
     fn serialize_unit_variant(
@@ -102,7 +102,7 @@ impl serde::Serializer for Serializer {
         _index: u32,
         variant: &'static str,
     ) -> Result<Self::Ok, Self::Error> {
-        Ok(variant.into())
+        Ok(variant.into_value())
     }
 
     fn serialize_newtype_struct<Value>(
@@ -126,7 +126,7 @@ impl serde::Serializer for Serializer {
     where
         Value: Serialize + ?Sized,
     {
-        nest(variant, &value.serialize(self)?)
+        nest(variant, value.serialize(self)?)
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq, Self::Error> {

@@ -1,6 +1,9 @@
 use super::Serializer;
 use crate::error::Error;
-use magnus::{RHash, Value};
+use magnus::{
+    value::{qnil, ReprValue},
+    IntoValue, RHash, Value,
+};
 use serde::{ser::SerializeMap, Serialize};
 
 pub struct MapSerializer {
@@ -12,7 +15,7 @@ impl MapSerializer {
     pub fn new(hash: RHash) -> MapSerializer {
         MapSerializer {
             hash,
-            key: Value::default(),
+            key: qnil().as_value(),
         }
     }
 }
@@ -39,6 +42,6 @@ impl SerializeMap for MapSerializer {
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(*self.hash)
+        Ok(self.hash.into_value())
     }
 }

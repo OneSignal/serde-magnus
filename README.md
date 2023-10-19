@@ -111,7 +111,7 @@ assert_eq!(
 
 ## Requirements
 
-`serde_magnus` requires Rust 1.51+ and Ruby 2.6+.
+`serde_magnus` requires Rust 1.65+ and Ruby 3.0+.
 
 ## License
 

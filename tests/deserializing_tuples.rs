@@ -1,4 +1,8 @@
-use magnus::{eval, Error, RArray, QNIL};
+use magnus::{
+    eval,
+    value::{qnil, ReprValue},
+    Error, RArray,
+};
 use serde_magnus::deserialize;
 
 #[test]
@@ -6,7 +10,7 @@ fn test_deserializing_tuples() -> Result<(), Error> {
     let _cleanup = unsafe { magnus::embed::init() };
 
     // From nil
-    assert_eq!((), deserialize(QNIL)?);
+    assert_eq!((), deserialize(qnil().as_value())?);
 
     // From a homogeneous array
     let input: RArray = eval!("[ 123, 456, 789 ]")?;
