@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Ruby and Rust
-        uses: oxidize-rb/actions/setup-ruby-and-rust@v1.1.9
+        uses: oxidize-rb/actions/setup-ruby-and-rust@v1.2.5
         with:
           rustup-toolchain: ${{ matrix.rustup-toolchain }}
           ruby-version: ${{ matrix.ruby-version }}
