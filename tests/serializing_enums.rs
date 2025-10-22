@@ -12,18 +12,19 @@ enum A {
 
 #[test]
 fn test_serializing_enums() -> Result<(), Error> {
-    let _cleanup = unsafe { magnus::embed::init() };
+    let ruby = unsafe { magnus::embed::init() };
 
-    let output: RString = serialize(&A::A)?;
-    assert!(eval!("output == 'A'", output)?);
+    let output: RString = serialize(&ruby, &A::A)?;
+    assert!(eval!(&ruby, "output == 'A'", output)?);
 
     let input = A::B(123);
-    let output: RHash = serialize(&input)?;
-    assert!(eval!("output == { 'B' => 123 }", output)?);
+    let output: RHash = serialize(&ruby, &input)?;
+    assert!(eval!(&ruby, "output == { 'B' => 123 }", output)?);
 
     let input = A::C(123, true, "Hello, world!".into());
-    let output: RHash = serialize(&input)?;
+    let output: RHash = serialize(&ruby, &input)?;
     assert!(eval!(
+        &ruby,
         "output == { 'C' => [ 123, true, 'Hello, world!' ] }",
         output
     )?);
@@ -31,8 +32,9 @@ fn test_serializing_enums() -> Result<(), Error> {
     let input = A::D {
         message: "Hello, world!".into(),
     };
-    let output: RHash = serialize(&input)?;
+    let output: RHash = serialize(&ruby, &input)?;
     assert!(eval!(
+        &ruby,
         "output == { 'D' => { message: 'Hello, world!' } }",
         output
     )?);

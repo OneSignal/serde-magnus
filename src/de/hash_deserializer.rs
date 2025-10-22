@@ -1,24 +1,26 @@
 use super::{array_enumerator::ArrayEnumerator, Deserializer};
 use crate::error::Error;
-use magnus::{exception, value::ReprValue, RHash};
+use magnus::{value::ReprValue, RHash, Ruby};
 use serde::de::{DeserializeSeed, MapAccess};
 use std::iter::Peekable;
 
-pub struct HashDeserializer {
+pub struct HashDeserializer<'r> {
+    ruby: &'r Ruby,
     hash: RHash,
-    keys: Peekable<ArrayEnumerator>,
+    keys: Peekable<ArrayEnumerator<'r>>,
 }
 
-impl HashDeserializer {
-    pub fn new(hash: RHash) -> Result<HashDeserializer, Error> {
+impl<'r> HashDeserializer<'r> {
+    pub fn new(ruby: &'r Ruby, hash: RHash) -> Result<HashDeserializer<'r>, Error> {
         Ok(HashDeserializer {
+            ruby,
             hash,
-            keys: ArrayEnumerator::new(hash.funcall("keys", ())?).peekable(),
+            keys: ArrayEnumerator::new(ruby, hash.funcall("keys", ())?).peekable(),
         })
     }
 }
 
-impl<'i> MapAccess<'i> for HashDeserializer {
+impl<'r, 'i> MapAccess<'i> for HashDeserializer<'r> {
     type Error = Error;
 
     fn next_key_seed<Seed>(&mut self, seed: Seed) -> Result<Option<Seed::Value>, Self::Error>
@@ -26,10 +28,12 @@ impl<'i> MapAccess<'i> for HashDeserializer {
         Seed: DeserializeSeed<'i>,
     {
         match self.keys.peek() {
-            Some(&Ok(key)) => seed.deserialize(Deserializer::new(key)).map(Some),
+            Some(&Ok(key)) => seed
+                .deserialize(Deserializer::new(self.ruby, key))
+                .map(Some),
 
             Some(Err(error)) => Err(Error::new(
-                exception::runtime_error(),
+                self.ruby.exception_runtime_error(),
                 format!("encountered unexpected error: {}", error),
             )),
 
@@ -42,9 +46,12 @@ impl<'i> MapAccess<'i> for HashDeserializer {
         Seed: DeserializeSeed<'i>,
     {
         match self.keys.next() {
-            Some(Ok(key)) => seed.deserialize(Deserializer::new(self.hash.aref(key)?)),
+            Some(Ok(key)) => seed.deserialize(Deserializer::new(self.ruby, self.hash.aref(key)?)),
             Some(Err(error)) => Err(error.into()),
-            None => Err(Error::new(exception::index_error(), "index out of range")),
+            None => Err(Error::new(
+                self.ruby.exception_index_error(),
+                "index out of range",
+            )),
         }
     }
 }

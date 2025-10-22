@@ -1,20 +1,25 @@
 use super::{enums::nest, Serializer};
 use crate::error::Error;
-use magnus::{RArray, Value};
+use magnus::{RArray, Ruby, Value};
 use serde::{ser::SerializeTupleVariant, Serialize};
 
-pub struct TupleVariantSerializer {
+pub struct TupleVariantSerializer<'r> {
+    ruby: &'r Ruby,
     variant: &'static str,
     array: RArray,
 }
 
-impl TupleVariantSerializer {
-    pub fn new(variant: &'static str, array: RArray) -> TupleVariantSerializer {
-        TupleVariantSerializer { variant, array }
+impl<'r> TupleVariantSerializer<'r> {
+    pub fn new(ruby: &'r Ruby, variant: &'static str, array: RArray) -> TupleVariantSerializer<'r> {
+        TupleVariantSerializer {
+            ruby,
+            variant,
+            array,
+        }
     }
 }
 
-impl SerializeTupleVariant for TupleVariantSerializer {
+impl<'r> SerializeTupleVariant for TupleVariantSerializer<'r> {
     type Ok = Value;
     type Error = Error;
 
@@ -23,11 +28,11 @@ impl SerializeTupleVariant for TupleVariantSerializer {
         Field: Serialize + ?Sized,
     {
         self.array
-            .push(field.serialize(Serializer)?)
+            .push(field.serialize(Serializer::new(self.ruby))?)
             .map_err(Into::into)
     }
 
     fn end(self) -> Result<Self::Ok, self::Error> {
-        nest(self.variant, self.array)
+        nest(self.ruby, self.variant, self.array)
     }
 }

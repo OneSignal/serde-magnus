@@ -1,11 +1,11 @@
 use crate::error::Error;
-use magnus::{IntoValue, RHash, Value};
+use magnus::{IntoValue, Ruby, Value};
 
-pub fn nest<Data>(variant: &'static str, data: Data) -> Result<Value, Error>
+pub fn nest<Data>(ruby: &Ruby, variant: &'static str, data: Data) -> Result<Value, Error>
 where
     Data: IntoValue,
 {
-    let hash = RHash::new();
+    let hash = ruby.hash_new();
     hash.aset(variant, data)?;
-    Ok(hash.into_value())
+    Ok(hash.into_value_with(ruby))
 }

@@ -3,13 +3,13 @@ use serde_magnus::serialize;
 
 #[test]
 fn test_serializing_booleans() -> Result<(), Error> {
-    let _cleanup = unsafe { magnus::embed::init() };
+    let ruby = unsafe { magnus::embed::init() };
 
-    let output: Value = serialize(&true)?;
-    assert!(eval!("output == true", output)?);
+    let output: Value = serialize(&ruby, &true)?;
+    assert!(eval!(&ruby, "output == true", output)?);
 
-    let output: Value = serialize(&false)?;
-    assert!(eval!("output == false", output)?);
+    let output: Value = serialize(&ruby, &false)?;
+    assert!(eval!(&ruby, "output == false", output)?);
 
     Ok(())
 }

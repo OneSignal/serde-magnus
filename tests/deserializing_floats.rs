@@ -1,11 +1,11 @@
-use magnus::{Error, Float};
+use magnus::Error;
 use serde_magnus::deserialize;
 
 #[test]
 fn test_deserializing_floats() -> Result<(), Error> {
-    let _cleanup = unsafe { magnus::embed::init() };
+    let ruby = unsafe { magnus::embed::init() };
 
-    let output: f64 = deserialize(Float::from_f64(1.23))?;
+    let output: f64 = deserialize(&ruby, ruby.float_from_f64(1.23))?;
     assert_eq!(1.23, output);
 
     Ok(())

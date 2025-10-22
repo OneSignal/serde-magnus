@@ -1,7 +1,6 @@
 use magnus::{
-    exception,
-    value::{qnil, Qfalse, Qtrue, ReprValue},
-    Fixnum, Float, RArray, RBignum, RHash, RString, Symbol, Value,
+    value::{Qfalse, Qtrue, ReprValue},
+    Fixnum, Float, RArray, RBignum, RHash, RString, Ruby, Symbol, Value,
 };
 
 use serde::forward_to_deserialize_any;
@@ -9,17 +8,18 @@ use serde::forward_to_deserialize_any;
 use super::{ArrayDeserializer, EnumDeserializer, HashDeserializer};
 use crate::error::Error;
 
-pub struct Deserializer {
+pub struct Deserializer<'r> {
+    ruby: &'r Ruby,
     value: Value,
 }
 
-impl Deserializer {
-    pub fn new(value: Value) -> Deserializer {
-        Deserializer { value }
+impl<'r> Deserializer<'r> {
+    pub fn new(ruby: &'r Ruby, value: Value) -> Deserializer<'r> {
+        Deserializer { ruby, value }
     }
 }
 
-impl<'i> serde::Deserializer<'i> for Deserializer {
+impl<'r, 'i> serde::Deserializer<'i> for Deserializer<'r> {
     type Error = Error;
 
     fn deserialize_any<Visitor>(self, visitor: Visitor) -> Result<Visitor::Value, Self::Error>
@@ -59,15 +59,15 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
         }
 
         if let Some(array) = RArray::from_value(self.value) {
-            return visitor.visit_seq(ArrayDeserializer::new(array));
+            return visitor.visit_seq(ArrayDeserializer::new(self.ruby, array));
         }
 
         if let Some(hash) = RHash::from_value(self.value) {
-            return visitor.visit_map(HashDeserializer::new(hash)?);
+            return visitor.visit_map(HashDeserializer::new(self.ruby, hash)?);
         }
 
         Err(Error::new(
-            exception::type_error(),
+            self.ruby.exception_type_error(),
             format!(
                 "can't deserialize {}",
                 unsafe { self.value.classname() }.into_owned()
@@ -80,7 +80,7 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
         Visitor: serde::de::Visitor<'i>,
     {
         Err(Error::new(
-            exception::type_error(),
+            self.ruby.exception_type_error(),
             "can't deserialize into byte slice",
         ))
     }
@@ -93,7 +93,7 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
             visitor.visit_byte_buf(unsafe { string.as_slice() }.to_owned())
         } else {
             Err(Error::new(
-                exception::type_error(),
+                self.ruby.exception_type_error(),
                 format!(
                     "no implicit conversion of {} to String",
                     unsafe { self.value.classname() }.into_owned()
@@ -124,8 +124,9 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
     {
         if let Some(variant) = RString::from_value(self.value) {
             return visitor.visit_enum(EnumDeserializer::new(
+                self.ruby,
                 variant.to_string()?,
-                qnil().as_value(),
+                self.ruby.qnil().as_value(),
             ));
         }
 
@@ -133,19 +134,21 @@ impl<'i> serde::Deserializer<'i> for Deserializer {
             if hash.len() == 1 {
                 let keys: RArray = hash.funcall("keys", ())?;
                 let key: String = keys.entry(0)?;
-                let value = hash.get(key.as_str()).unwrap_or_else(|| qnil().as_value());
+                let value = hash
+                    .get(key.as_str())
+                    .unwrap_or_else(|| self.ruby.qnil().as_value());
 
-                return visitor.visit_enum(EnumDeserializer::new(key, value));
+                return visitor.visit_enum(EnumDeserializer::new(self.ruby, key, value));
             } else {
                 return Err(Error::new(
-                    exception::type_error(),
+                    self.ruby.exception_type_error(),
                     format!("can't deserialize Hash of length {} to Enum", hash.len()),
                 ));
             }
         }
 
         Err(Error::new(
-            exception::type_error(),
+            self.ruby.exception_type_error(),
             format!(
                 "can't deserialize {} to Enum",
                 unsafe { self.value.classname() }.into_owned()

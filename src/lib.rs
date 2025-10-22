@@ -9,7 +9,7 @@
 //! trait into a Ruby equivalent.
 //!
 //! ```
-//! # let _cleanup = unsafe { magnus::embed::init() };
+//! # let ruby = unsafe { magnus::embed::init() };
 //! #
 //! use serde::{Serialize, Deserialize};
 //! use magnus::{eval, Value};
@@ -42,9 +42,10 @@
 //!     ]
 //! };
 //!
-//! let post: Value = serialize(&post)?;
+//! let post: Value = serialize(&ruby, &post)?;
 //!
 //! assert!(eval!(
+//!     &ruby,
 //!     r#"
 //!     post == {
 //!       title: "Spring carnival planning update",
@@ -68,7 +69,7 @@
 //! # use serde::Deserialize;
 //! # use magnus::{eval, RHash};
 //! #
-//! # let _cleanup = unsafe { magnus::embed::init() };
+//! # let ruby = unsafe { magnus::embed::init() };
 //! #
 //! # #[derive(Deserialize, PartialEq, Debug)]
 //! # struct Post {
@@ -86,7 +87,7 @@
 //! #
 //! use serde_magnus::deserialize;
 //!
-//! let post: RHash = eval!(r#"
+//! let post: RHash = eval!(&ruby, r#"
 //!   {
 //!     title: "Spring carnival planning update",
 //!     content: "Here's what's new.",
@@ -98,7 +99,7 @@
 //!   }
 //! "#)?;
 //!
-//! let post: Post = deserialize(post)?;
+//! let post: Post = deserialize(&ruby, post)?;
 //!
 //! assert_eq!(
 //!     Post {

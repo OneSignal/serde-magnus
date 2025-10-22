@@ -15,7 +15,7 @@ use self::{
     tuple_variant_serializer::TupleVariantSerializer,
 };
 
-use magnus::{Error, TryConvert};
+use magnus::{Error, Ruby, TryConvert};
 use serde::Serialize;
 
 /// Serialize Rust data to a Ruby [`Value`][`magnus::Value`].
@@ -35,16 +35,16 @@ use serde::Serialize;
 /// | `&[u8]`                   | A `String` with ASCII-8BIT encoding |
 ///
 /// ```
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// use magnus::{eval, Value};
 /// use serde_magnus::serialize;
 ///
-/// let output: Value = serialize(&1234)?;
-/// assert!(eval!("output == 1234", output)?);
+/// let output: Value = serialize(&ruby, &1234)?;
+/// assert!(eval!(&ruby, "output == 1234", output)?);
 ///
-/// let output: Value = serialize("Hello, world!")?;
-/// assert!(eval!("output == 'Hello, world!'", output)?);
+/// let output: Value = serialize(&ruby, "Hello, world!")?;
+/// assert!(eval!(&ruby, "output == 'Hello, world!'", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -57,15 +57,15 @@ use serde::Serialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// let input: Option<u64> = None;
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == nil", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == nil", output)?);
 ///
 /// let input: Option<u64> = Some(1234);
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == 1234", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == 1234", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -78,15 +78,15 @@ use serde::Serialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// let input: Result<u64, &str> = Ok(1234);
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == { 'Ok' => 1234 }", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == { 'Ok' => 1234 }", output)?);
 ///
 /// let input: Result<u64, &str> = Err("something went wrong");
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == { 'Err' => 'something went wrong' }", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == { 'Err' => 'something went wrong' }", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -99,15 +99,15 @@ use serde::Serialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// use serde::Serialize;
 ///
 /// #[derive(Serialize)]
 /// struct Foo;
 ///
-/// let output: Value = serialize(&Foo)?;
-/// assert!(eval!("output == nil", output)?);
+/// let output: Value = serialize(&ruby, &Foo)?;
+/// assert!(eval!(&ruby, "output == nil", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -119,14 +119,14 @@ use serde::Serialize;
 /// # use serde::Serialize;
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// #[derive(Serialize)]
 /// struct Foo(u16);
 ///
 /// let input = Foo(1234);
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == 1234", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == 1234", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -138,14 +138,14 @@ use serde::Serialize;
 /// # use serde::Serialize;
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// #[derive(Serialize)]
 /// struct Foo<'a>(u16, bool, &'a str);
 ///
 /// let input = Foo(1234, false, "Hello, world!");
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == [1234, false, 'Hello, world!']", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == [1234, false, 'Hello, world!']", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -157,7 +157,7 @@ use serde::Serialize;
 /// # use serde::Serialize;
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// #[derive(Serialize)]
 /// struct Foo<'a> {
@@ -167,8 +167,9 @@ use serde::Serialize;
 /// }
 ///
 /// let input = Foo { bar: 1234, baz: false, glorp: "Hello, world!" };
-/// let output: Value = serialize(&input)?;
+/// let output: Value = serialize(&ruby, &input)?;
 /// assert!(eval!(
+///     &ruby,
 ///     r#"
 ///     output == {
 ///       bar: 1234,
@@ -207,7 +208,7 @@ use serde::Serialize;
 /// # use serde::Serialize;
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(Serialize)]
 /// # enum Foo<'a> {
@@ -221,8 +222,8 @@ use serde::Serialize;
 /// #     }
 /// # }
 /// #
-/// let output: Value = serialize(&Foo::Bar)?;
-/// assert!(eval!("output == 'Bar'", output)?);
+/// let output: Value = serialize(&ruby, &Foo::Bar)?;
+/// assert!(eval!(&ruby, "output == 'Bar'", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -237,7 +238,7 @@ use serde::Serialize;
 /// # use serde::Serialize;
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(Serialize)]
 /// # enum Foo<'a> {
@@ -252,8 +253,8 @@ use serde::Serialize;
 /// # }
 /// #
 /// let input = Foo::Baz(1234);
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == { 'Baz' => 1234 }", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == { 'Baz' => 1234 }", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -265,7 +266,7 @@ use serde::Serialize;
 /// # use serde::Serialize;
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(Serialize)]
 /// # enum Foo<'a> {
@@ -280,8 +281,8 @@ use serde::Serialize;
 /// # }
 /// #
 /// let input = Foo::Glorp(1234, false, "Hello, world!");
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == { 'Glorp' => [1234, false, 'Hello, world!'] }", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == { 'Glorp' => [1234, false, 'Hello, world!'] }", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -293,7 +294,7 @@ use serde::Serialize;
 /// # use serde::Serialize;
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(Serialize)]
 /// # enum Foo<'a> {
@@ -308,8 +309,9 @@ use serde::Serialize;
 /// # }
 /// #
 /// let input = Foo::Quux { frob: 1234, wally: false, plugh: "Hello, world!" };
-/// let output: Value = serialize(&input)?;
+/// let output: Value = serialize(&ruby, &input)?;
 /// assert!(eval!(
+///     &ruby,
 ///     r#"
 ///     output == {
 ///       "Quux" => {
@@ -334,15 +336,15 @@ use serde::Serialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// let input = (123, false, "Hello, world!");
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == [123, false, 'Hello, world!']", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == [123, false, 'Hello, world!']", output)?);
 ///
 /// let input = [123, 456, 789];
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == [123, 456, 789]", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == [123, 456, 789]", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -355,11 +357,11 @@ use serde::Serialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// let input = vec![123, 456, 789];
-/// let output: Value = serialize(&input)?;
-/// assert!(eval!("output == [123, 456, 789]", output)?);
+/// let output: Value = serialize(&ruby, &input)?;
+/// assert!(eval!(&ruby, "output == [123, 456, 789]", output)?);
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
@@ -370,7 +372,7 @@ use serde::Serialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::serialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// use std::collections::HashMap;
 ///
@@ -380,8 +382,9 @@ use serde::Serialize;
 /// input.insert("high", "low");
 /// input.insert("goodbye", "hello");
 ///
-/// let output: Value = serialize(&input)?;
+/// let output: Value = serialize(&ruby, &input)?;
 /// assert!(eval!(
+///     &ruby,
 ///     r#"
 ///     output == {
 ///       "yes"     => "no",
@@ -395,10 +398,10 @@ use serde::Serialize;
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
-pub fn serialize<Input, Output>(input: &Input) -> Result<Output, Error>
+pub fn serialize<Input, Output>(ruby: &Ruby, input: &Input) -> Result<Output, Error>
 where
     Input: Serialize + ?Sized,
     Output: TryConvert,
 {
-    TryConvert::try_convert(input.serialize(Serializer)?)
+    TryConvert::try_convert(input.serialize(Serializer::new(ruby))?)
 }

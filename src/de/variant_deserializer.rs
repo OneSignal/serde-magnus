@@ -1,19 +1,20 @@
 use super::{ArrayDeserializer, Deserializer, HashDeserializer};
 use crate::error::Error;
-use magnus::{value::ReprValue, RArray, RHash, Value};
+use magnus::{value::ReprValue, RArray, RHash, Ruby, Value};
 use serde::de::{DeserializeSeed, Unexpected, VariantAccess};
 
-pub struct VariantDeserializer {
+pub struct VariantDeserializer<'r> {
+    ruby: &'r Ruby,
     value: Value,
 }
 
-impl VariantDeserializer {
-    pub fn new(value: Value) -> VariantDeserializer {
-        VariantDeserializer { value }
+impl<'r> VariantDeserializer<'r> {
+    pub fn new(ruby: &'r Ruby, value: Value) -> VariantDeserializer<'r> {
+        VariantDeserializer { ruby, value }
     }
 }
 
-impl<'i> VariantAccess<'i> for VariantDeserializer {
+impl<'r, 'i> VariantAccess<'i> for VariantDeserializer<'r> {
     type Error = Error;
 
     fn unit_variant(self) -> Result<(), Self::Error> {
@@ -32,7 +33,7 @@ impl<'i> VariantAccess<'i> for VariantDeserializer {
     where
         Seed: DeserializeSeed<'i>,
     {
-        seed.deserialize(Deserializer::new(self.value))
+        seed.deserialize(Deserializer::new(self.ruby, self.value))
     }
 
     fn tuple_variant<Visitor>(
@@ -44,7 +45,7 @@ impl<'i> VariantAccess<'i> for VariantDeserializer {
         Visitor: serde::de::Visitor<'i>,
     {
         if let Some(array) = RArray::from_value(self.value) {
-            visitor.visit_seq(&mut ArrayDeserializer::new(array))
+            visitor.visit_seq(&mut ArrayDeserializer::new(self.ruby, array))
         } else {
             Err(serde::de::Error::invalid_type(
                 #[allow(clippy::unnecessary_to_owned)]
@@ -63,7 +64,7 @@ impl<'i> VariantAccess<'i> for VariantDeserializer {
         Visitor: serde::de::Visitor<'i>,
     {
         if let Some(hash) = RHash::from_value(self.value) {
-            visitor.visit_map(&mut HashDeserializer::new(hash)?)
+            visitor.visit_map(&mut HashDeserializer::new(self.ruby, hash)?)
         } else {
             Err(serde::de::Error::invalid_type(
                 #[allow(clippy::unnecessary_to_owned)]

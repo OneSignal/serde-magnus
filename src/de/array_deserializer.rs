@@ -1,21 +1,23 @@
 use super::{array_enumerator::ArrayEnumerator, Deserializer};
 use crate::error::Error;
-use magnus::RArray;
+use magnus::{RArray, Ruby};
 use serde::de::{DeserializeSeed, SeqAccess};
 
-pub struct ArrayDeserializer {
-    entries: ArrayEnumerator,
+pub struct ArrayDeserializer<'r> {
+    ruby: &'r Ruby,
+    entries: ArrayEnumerator<'r>,
 }
 
-impl ArrayDeserializer {
-    pub fn new(array: RArray) -> ArrayDeserializer {
+impl<'r> ArrayDeserializer<'r> {
+    pub fn new(ruby: &'r Ruby, array: RArray) -> ArrayDeserializer<'r> {
         ArrayDeserializer {
-            entries: ArrayEnumerator::new(array),
+            ruby,
+            entries: ArrayEnumerator::new(ruby, array),
         }
     }
 }
 
-impl<'i> SeqAccess<'i> for ArrayDeserializer {
+impl<'r, 'i> SeqAccess<'i> for ArrayDeserializer<'r> {
     type Error = Error;
 
     fn next_element_seed<Seed>(&mut self, seed: Seed) -> Result<Option<Seed::Value>, Self::Error>
@@ -23,7 +25,9 @@ impl<'i> SeqAccess<'i> for ArrayDeserializer {
         Seed: DeserializeSeed<'i>,
     {
         match self.entries.next() {
-            Some(Ok(entry)) => seed.deserialize(Deserializer::new(entry)).map(Some),
+            Some(Ok(entry)) => seed
+                .deserialize(Deserializer::new(self.ruby, entry))
+                .map(Some),
             Some(Err(error)) => Err(error.into()),
             None => Ok(None),
         }

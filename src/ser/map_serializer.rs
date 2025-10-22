@@ -1,26 +1,25 @@
 use super::Serializer;
 use crate::error::Error;
-use magnus::{
-    value::{qnil, ReprValue},
-    IntoValue, RHash, Value,
-};
+use magnus::{value::ReprValue, IntoValue, RHash, Ruby, Value};
 use serde::{ser::SerializeMap, Serialize};
 
-pub struct MapSerializer {
+pub struct MapSerializer<'r> {
+    ruby: &'r Ruby,
     hash: RHash,
     key: Value,
 }
 
-impl MapSerializer {
-    pub fn new(hash: RHash) -> MapSerializer {
+impl<'r> MapSerializer<'r> {
+    pub fn new(ruby: &'r Ruby, hash: RHash) -> MapSerializer<'r> {
         MapSerializer {
+            ruby,
             hash,
-            key: qnil().as_value(),
+            key: ruby.qnil().as_value(),
         }
     }
 }
 
-impl SerializeMap for MapSerializer {
+impl<'r> SerializeMap for MapSerializer<'r> {
     type Ok = Value;
     type Error = Error;
 
@@ -28,7 +27,7 @@ impl SerializeMap for MapSerializer {
     where
         Key: Serialize + ?Sized,
     {
-        self.key = key.serialize(Serializer)?;
+        self.key = key.serialize(Serializer::new(self.ruby))?;
         Ok(())
     }
 
@@ -37,11 +36,11 @@ impl SerializeMap for MapSerializer {
         Value: Serialize + ?Sized,
     {
         self.hash
-            .aset(self.key, value.serialize(Serializer)?)
+            .aset(self.key, value.serialize(Serializer::new(self.ruby))?)
             .map_err(Into::into)
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(self.hash.into_value())
+        Ok(self.hash.into_value_with(self.ruby))
     }
 }
