@@ -4,9 +4,10 @@ use std::collections::HashMap;
 
 #[test]
 fn test_deserializing_maps() -> Result<(), Error> {
-    let _cleanup = unsafe { magnus::embed::init() };
+    let ruby = unsafe { magnus::embed::init() };
 
     let input: RHash = eval!(
+        &ruby,
         r#"
         {
           "Yes" => "No",
@@ -16,7 +17,7 @@ fn test_deserializing_maps() -> Result<(), Error> {
     "#
     )?;
 
-    let output: HashMap<String, String> = deserialize(input)?;
+    let output: HashMap<String, String> = deserialize(&ruby, input)?;
     assert_eq!(3, output.len());
     assert_eq!(Some(&"No".into()), output.get("Yes"));
     assert_eq!(Some(&"Go".into()), output.get("Stop"));

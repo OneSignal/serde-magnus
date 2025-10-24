@@ -1,28 +1,33 @@
 use super::VariantDeserializer;
 use crate::error::Error;
-use magnus::Value;
+use magnus::{Ruby, Value};
 use serde::de::{DeserializeSeed, EnumAccess, IntoDeserializer};
 
-pub struct EnumDeserializer {
+pub struct EnumDeserializer<'r> {
+    ruby: &'r Ruby,
     variant: String,
     value: Value,
 }
 
-impl EnumDeserializer {
-    pub fn new(variant: String, value: Value) -> EnumDeserializer {
-        EnumDeserializer { variant, value }
+impl<'r> EnumDeserializer<'r> {
+    pub fn new(ruby: &'r Ruby, variant: String, value: Value) -> EnumDeserializer<'r> {
+        EnumDeserializer {
+            ruby,
+            variant,
+            value,
+        }
     }
 }
 
-impl<'i> EnumAccess<'i> for EnumDeserializer {
-    type Variant = VariantDeserializer;
+impl<'r, 'i> EnumAccess<'i> for EnumDeserializer<'r> {
+    type Variant = VariantDeserializer<'r>;
     type Error = Error;
 
     fn variant_seed<Seed>(self, seed: Seed) -> Result<(Seed::Value, Self::Variant), Error>
     where
         Seed: DeserializeSeed<'i>,
     {
-        let deserializer = VariantDeserializer::new(self.value);
+        let deserializer = VariantDeserializer::new(self.ruby, self.value);
 
         seed.deserialize(self.variant.into_deserializer())
             .map(|value| (value, deserializer))

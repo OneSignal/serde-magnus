@@ -1,4 +1,4 @@
-use magnus::{eval, value::qnil, Error, Integer, IntoValue, RArray, RHash};
+use magnus::{eval, Error, IntoValue, RArray, RHash};
 use serde::Deserialize;
 use serde_magnus::deserialize;
 
@@ -18,20 +18,20 @@ struct D {
 
 #[test]
 fn test_deserializing_structs() -> Result<(), Error> {
-    let _cleanup = unsafe { magnus::embed::init() };
+    let ruby = unsafe { magnus::embed::init() };
 
-    assert_eq!(A, deserialize(qnil().into_value())?);
+    assert_eq!(A, deserialize(&ruby, ruby.qnil().into_value_with(&ruby))?);
 
-    let input = Integer::from_u64(123);
-    let output: B = deserialize(input)?;
+    let input = ruby.integer_from_u64(123);
+    let output: B = deserialize(&ruby, input)?;
     assert_eq!(B(123), output);
 
-    let input: RArray = eval!("[ 123, true, 'Hello, world!' ]")?;
-    let output: C = deserialize(input)?;
+    let input: RArray = eval!(&ruby, "[ 123, true, 'Hello, world!' ]")?;
+    let output: C = deserialize(&ruby, input)?;
     assert_eq!(C(123, true, "Hello, world!".into()), output);
 
-    let input: RHash = eval!("{ message: 'Hello, world!' }")?;
-    let output: D = deserialize(input)?;
+    let input: RHash = eval!(&ruby, "{ message: 'Hello, world!' }")?;
+    let output: D = deserialize(&ruby, input)?;
     assert_eq!(
         D {
             message: "Hello, world!".into()

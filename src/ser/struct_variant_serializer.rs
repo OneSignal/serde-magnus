@@ -1,20 +1,25 @@
 use super::{enums::nest, Serializer};
 use crate::error::Error;
-use magnus::{RHash, Symbol, Value};
+use magnus::{RHash, Ruby, Value};
 use serde::{ser::SerializeStructVariant, Serialize};
 
-pub struct StructVariantSerializer {
+pub struct StructVariantSerializer<'r> {
+    ruby: &'r Ruby,
     variant: &'static str,
     hash: RHash,
 }
 
-impl StructVariantSerializer {
-    pub fn new(variant: &'static str, hash: RHash) -> StructVariantSerializer {
-        StructVariantSerializer { variant, hash }
+impl<'r> StructVariantSerializer<'r> {
+    pub fn new(ruby: &'r Ruby, variant: &'static str, hash: RHash) -> StructVariantSerializer<'r> {
+        StructVariantSerializer {
+            ruby,
+            variant,
+            hash,
+        }
     }
 }
 
-impl SerializeStructVariant for StructVariantSerializer {
+impl<'r> SerializeStructVariant for StructVariantSerializer<'r> {
     type Ok = Value;
     type Error = Error;
 
@@ -27,11 +32,14 @@ impl SerializeStructVariant for StructVariantSerializer {
         Value: Serialize + ?Sized,
     {
         self.hash
-            .aset(Symbol::new(name), value.serialize(Serializer)?)
+            .aset(
+                self.ruby.to_symbol(name),
+                value.serialize(Serializer::new(self.ruby))?,
+            )
             .map_err(Into::into)
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        nest(self.variant, self.hash)
+        nest(self.ruby, self.variant, self.hash)
     }
 }

@@ -13,7 +13,7 @@ use self::{
     hash_deserializer::HashDeserializer, variant_deserializer::VariantDeserializer,
 };
 
-use magnus::{Error, IntoValue};
+use magnus::{Error, IntoValue, Ruby};
 use serde::Deserialize;
 
 /// Deserialize a Ruby [`Value`][`magnus::Value`] to Rust.
@@ -25,13 +25,13 @@ use serde::Deserialize;
 /// #### Unit type
 ///
 /// ```
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// use magnus::{eval, Value};
 /// use serde_magnus::deserialize;
 ///
-/// let input: Value = eval!("nil")?;
-/// let output: () = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "nil")?;
+/// let output: () = deserialize(&ruby, input)?;
 /// assert_eq!((), output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -43,10 +43,10 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("true")?;
-/// let output: bool = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "true")?;
+/// let output: bool = deserialize(&ruby, input)?;
 /// assert_eq!(true, output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -58,10 +58,10 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("1234")?;
-/// let output: i64 = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "1234")?;
+/// let output: i64 = deserialize(&ruby, input)?;
 /// assert_eq!(1234, output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -73,10 +73,10 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("3.14")?;
-/// let output: f64 = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "3.14")?;
+/// let output: f64 = deserialize(&ruby, input)?;
 /// assert_eq!(3.14, output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -88,10 +88,10 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!(r#""Hello, world!""#)?;
-/// let output: String = deserialize(input)?;
+/// let input: Value = eval!(&ruby, r#""Hello, world!""#)?;
+/// let output: String = deserialize(&ruby, input)?;
 /// assert_eq!("Hello, world!", output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -103,14 +103,14 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("nil")?;
-/// let output: Option<i64> = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "nil")?;
+/// let output: Option<i64> = deserialize(&ruby, input)?;
 /// assert_eq!(None, output);
 ///
-/// let input: Value = eval!("1234")?;
-/// let output: Option<i64> = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "1234")?;
+/// let output: Option<i64> = deserialize(&ruby, input)?;
 /// assert_eq!(Some(1234), output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -122,14 +122,14 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("{ 'Ok' => 1234 }")?;
-/// let output: Result<i64, String> = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "{ 'Ok' => 1234 }")?;
+/// let output: Result<i64, String> = deserialize(&ruby, input)?;
 /// assert_eq!(Ok(1234), output);
 ///
-/// let input: Value = eval!("{ 'Err' => 'something went wrong' }")?;
-/// let output: Result<i64, String> = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "{ 'Err' => 'something went wrong' }")?;
+/// let output: Result<i64, String> = deserialize(&ruby, input)?;
 /// assert_eq!(Err("something went wrong".into()), output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -143,15 +143,15 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// use serde::Deserialize;
 ///
 /// #[derive(PartialEq, Debug, Deserialize)]
 /// struct Foo;
 ///
-/// let input: Value = eval!("nil")?;
-/// let output: Foo = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "nil")?;
+/// let output: Foo = deserialize(&ruby, input)?;
 /// assert_eq!(Foo, output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -163,15 +163,15 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// use serde::Deserialize;
 ///
 /// #[derive(PartialEq, Debug, Deserialize)]
 /// struct Foo(u16);
 ///
-/// let input: Value = eval!("1234")?;
-/// let output: Foo = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "1234")?;
+/// let output: Foo = deserialize(&ruby, input)?;
 /// assert_eq!(Foo(1234), output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -183,15 +183,15 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// use serde::Deserialize;
 ///
 /// #[derive(PartialEq, Debug, Deserialize)]
 /// struct Foo(u16, bool, String);
 ///
-/// let input: Value = eval!("[123, true, 'Hello, world!']")?;
-/// let output: Foo = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "[123, true, 'Hello, world!']")?;
+/// let output: Foo = deserialize(&ruby, input)?;
 /// assert_eq!(Foo(123, true, "Hello, world!".into()), output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -204,7 +204,7 @@ use serde::Deserialize;
 /// # use serde::Deserialize;
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// #[derive(PartialEq, Debug, Deserialize)]
 /// struct Foo {
@@ -213,8 +213,8 @@ use serde::Deserialize;
 ///     glorp: String
 /// }
 ///
-/// let input: Value = eval!("{ bar: 1234, baz: true, glorp: 'Hello, world!' }")?;
-/// let output: Foo = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "{ bar: 1234, baz: true, glorp: 'Hello, world!' }")?;
+/// let output: Foo = deserialize(&ruby, input)?;
 /// assert_eq!(
 ///     Foo { bar: 1234, baz: true, glorp: "Hello, world!".into() },
 ///     output
@@ -247,13 +247,13 @@ use serde::Deserialize;
 /// # use serde::Deserialize;
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(PartialEq, Debug, Deserialize)]
 /// # enum Foo { Bar }
 /// #
-/// let input: Value = eval!("'Bar'")?;
-/// let output: Foo = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "'Bar'")?;
+/// let output: Foo = deserialize(&ruby, input)?;
 /// assert_eq!(Foo::Bar, output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -266,13 +266,13 @@ use serde::Deserialize;
 /// # use serde::Deserialize;
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(PartialEq, Debug, Deserialize)]
 /// # enum Foo { Baz(u16) }
 /// #
-/// let input: Value = eval!("{ 'Baz' => 1234 }")?;
-/// let output: Foo = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "{ 'Baz' => 1234 }")?;
+/// let output: Foo = deserialize(&ruby, input)?;
 /// assert_eq!(Foo::Baz(1234), output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -285,13 +285,13 @@ use serde::Deserialize;
 /// # use serde::Deserialize;
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(PartialEq, Debug, Deserialize)]
 /// # enum Foo { Glorp(u16, bool, String) }
 /// #
-/// let input: Value = eval!("{ 'Glorp' => [123, true, 'Hello, world!'] }")?;
-/// let output: Foo = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "{ 'Glorp' => [123, true, 'Hello, world!'] }")?;
+/// let output: Foo = deserialize(&ruby, input)?;
 /// assert_eq!(Foo::Glorp(123, true, "Hello, world!".into()), output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -304,7 +304,7 @@ use serde::Deserialize;
 /// # use serde::Deserialize;
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// # #[derive(PartialEq, Debug, Deserialize)]
 /// # enum Foo {
@@ -315,7 +315,7 @@ use serde::Deserialize;
 /// #     }
 /// # }
 /// #
-/// let input: Value = eval!(r#"
+/// let input: Value = eval!(&ruby, r#"
 ///     {
 ///       "Quux" => {
 ///         frob: 1234,
@@ -324,7 +324,7 @@ use serde::Deserialize;
 ///       }
 ///     }
 /// "#)?;
-/// let output: Foo = deserialize(input)?;
+/// let output: Foo = deserialize(&ruby, input)?;
 /// assert_eq!(
 ///     Foo::Quux { frob: 1234, wally: true, plugh: "Hello, world!".into() },
 ///     output
@@ -341,10 +341,10 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("[123, true, 'Hello, world!']")?;
-/// let output: (i16, bool, String) = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "[123, true, 'Hello, world!']")?;
+/// let output: (i16, bool, String) = deserialize(&ruby, input)?;
 /// assert_eq!((123, true, "Hello, world!".into()), output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -356,10 +356,10 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("[123, 456, 789]")?;
-/// let output: [i64; 3] = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "[123, 456, 789]")?;
+/// let output: [i64; 3] = deserialize(&ruby, input)?;
 /// assert_eq!([123, 456, 789], output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -373,10 +373,10 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("[123, 456, 789]")?;
-/// let output: Vec<u64> = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "[123, 456, 789]")?;
+/// let output: Vec<u64> = deserialize(&ruby, input)?;
 /// assert_eq!(vec![123, 456, 789], output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -388,11 +388,11 @@ use serde::Deserialize;
 /// # use magnus::{eval, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// use std::collections::HashMap;
 ///
-/// let input: Value = eval!(r#"
+/// let input: Value = eval!(&ruby, r#"
 ///     {
 ///       "yes" => "no",
 ///       "stop" => "go",
@@ -400,7 +400,7 @@ use serde::Deserialize;
 ///       "goodbye" => "hello"
 ///     }
 /// "#)?;
-/// let output: HashMap<String, String> = deserialize(input)?;
+/// let output: HashMap<String, String> = deserialize(&ruby, input)?;
 /// assert_eq!(4, output.len());
 /// assert_eq!(Some(&String::from("no")), output.get("yes"));
 /// #
@@ -424,10 +424,10 @@ use serde::Deserialize;
 /// # use magnus::{eval, Error, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("'Hello, world!'")?;
-/// let output: Result<&str, Error> = deserialize(input);
+/// let input: Value = eval!(&ruby, "'Hello, world!'")?;
+/// let output: Result<&str, Error> = deserialize(&ruby, input);
 /// assert!(output.is_err());
 /// assert_eq!(
 ///    r#"TypeError: invalid type: expected a borrowed string, got string "Hello, world!""#,
@@ -443,10 +443,10 @@ use serde::Deserialize;
 /// # use magnus::{eval, Error, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("'Hello, world!'")?;
-/// let output: String = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "'Hello, world!'")?;
+/// let output: String = deserialize(&ruby, input)?;
 /// assert_eq!("Hello, world!", output);
 /// #
 /// # Ok::<(), magnus::Error>(())
@@ -460,10 +460,10 @@ use serde::Deserialize;
 /// # use magnus::{eval, Error, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
-/// let input: Value = eval!("'☃'")?;
-/// let output: Result<&[u8], Error> = deserialize(input);
+/// let input: Value = eval!(&ruby, "'☃'")?;
+/// let output: Result<&[u8], Error> = deserialize(&ruby, input);
 /// assert!(output.is_err());
 /// assert_eq!(
 ///     "TypeError: can't deserialize into byte slice",
@@ -479,20 +479,20 @@ use serde::Deserialize;
 /// # use magnus::{eval, Error, Value};
 /// # use serde_magnus::deserialize;
 /// #
-/// # let _cleanup = unsafe { magnus::embed::init() };
+/// # let ruby = unsafe { magnus::embed::init() };
 /// #
 /// use serde_bytes::ByteBuf;
 ///
-/// let input: Value = eval!("'☃'")?;
-/// let output: ByteBuf = deserialize(input)?;
+/// let input: Value = eval!(&ruby, "'☃'")?;
+/// let output: ByteBuf = deserialize(&ruby, input)?;
 /// assert_eq!(vec![226, 152, 131], output.into_vec());
 /// #
 /// # Ok::<(), magnus::Error>(())
 /// ```
-pub fn deserialize<'i, Input, Output>(input: Input) -> Result<Output, Error>
+pub fn deserialize<'i, Input, Output>(ruby: &Ruby, input: Input) -> Result<Output, Error>
 where
     Input: IntoValue,
     Output: Deserialize<'i>,
 {
-    Output::deserialize(Deserializer::new(input.into_value())).map_err(Into::into)
+    Output::deserialize(Deserializer::new(ruby, input.into_value_with(ruby))).map_err(Into::into)
 }

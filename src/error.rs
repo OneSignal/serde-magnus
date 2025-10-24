@@ -1,4 +1,4 @@
-use magnus::{exception, ExceptionClass};
+use magnus::{ExceptionClass, Ruby};
 use std::{borrow::Cow, fmt};
 
 #[derive(Debug)]
@@ -30,7 +30,10 @@ impl serde::ser::Error for Error {
     where
         Message: fmt::Display,
     {
-        Error::new(exception::runtime_error(), message.to_string())
+        Error::new(
+            Ruby::get().unwrap().exception_runtime_error(),
+            message.to_string(),
+        )
     }
 }
 
@@ -39,12 +42,15 @@ impl serde::de::Error for Error {
     where
         Message: fmt::Display,
     {
-        Error::new(exception::runtime_error(), message.to_string())
+        Error::new(
+            Ruby::get().unwrap().exception_runtime_error(),
+            message.to_string(),
+        )
     }
 
     fn invalid_type(unexpected: serde::de::Unexpected, expected: &dyn serde::de::Expected) -> Self {
         Error::new(
-            exception::type_error(),
+            Ruby::get().unwrap().exception_type_error(),
             format!("invalid type: expected {}, got {}", expected, unexpected),
         )
     }

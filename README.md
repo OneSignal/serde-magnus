@@ -18,7 +18,7 @@ The [`serde_magnus::serialize`] function converts from a Rust type implementing 
 
 ```rust
 use serde::{Serialize, Deserialize};
-use magnus::{eval, Value};
+use magnus::{eval, Ruby, Value};
 use serde_magnus::serialize;
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -48,9 +48,11 @@ let post = Post {
     ]
 };
 
-let post: Value = serialize(&post)?;
+let ruby = Ruby::get().unwrap();
+let post: Value = serialize(&ruby, &post)?;
 
 assert!(eval!(
+    &ruby,
     r#"
     post == {
       title: "Spring carnival planning update",
@@ -70,10 +72,11 @@ assert!(eval!(
 [`serde::Deserialize`].
 
 ```rust
-use magnus::RHash;
+use magnus::{RHash, Ruby};
 use serde_magnus::deserialize;
 
-let post: RHash = eval!(r#"
+let ruby = Ruby::get().unwrap();
+let post: RHash = eval!(&ruby, r#"
   {
     title: "Spring carnival planning update",
     content: "Here's what's new.",
@@ -85,7 +88,7 @@ let post: RHash = eval!(r#"
   }
 "#)?;
 
-let post: Post = deserialize(post)?;
+let post: Post = deserialize(&ruby, post)?;
 
 assert_eq!(
     Post {

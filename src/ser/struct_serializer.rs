@@ -1,19 +1,20 @@
 use super::Serializer;
 use crate::error::Error;
-use magnus::{IntoValue, RHash, Symbol, Value};
+use magnus::{IntoValue, RHash, Ruby, Value};
 use serde::{ser::SerializeStruct, Serialize};
 
-pub struct StructSerializer {
+pub struct StructSerializer<'r> {
+    ruby: &'r Ruby,
     hash: RHash,
 }
 
-impl StructSerializer {
-    pub fn new(hash: RHash) -> StructSerializer {
-        StructSerializer { hash }
+impl<'r> StructSerializer<'r> {
+    pub fn new(ruby: &'r Ruby, hash: RHash) -> StructSerializer<'r> {
+        StructSerializer { ruby, hash }
     }
 }
 
-impl SerializeStruct for StructSerializer {
+impl<'r> SerializeStruct for StructSerializer<'r> {
     type Ok = Value;
     type Error = Error;
 
@@ -26,11 +27,14 @@ impl SerializeStruct for StructSerializer {
         Value: Serialize + ?Sized,
     {
         self.hash
-            .aset(Symbol::new(name), value.serialize(Serializer)?)
+            .aset(
+                self.ruby.to_symbol(name),
+                value.serialize(Serializer::new(self.ruby))?,
+            )
             .map_err(Into::into)
     }
 
     fn end(self) -> Result<Self::Ok, Self::Error> {
-        Ok(self.hash.into_value())
+        Ok(self.hash.into_value_with(self.ruby))
     }
 }

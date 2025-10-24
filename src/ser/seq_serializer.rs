@@ -1,22 +1,23 @@
 use super::Serializer;
 use crate::error::Error;
-use magnus::{IntoValue, RArray, Value};
+use magnus::{IntoValue, RArray, Ruby, Value};
 use serde::{
     ser::{SerializeSeq, SerializeTuple, SerializeTupleStruct},
     Serialize,
 };
 
-pub struct SeqSerializer {
+pub struct SeqSerializer<'r> {
+    ruby: &'r Ruby,
     array: RArray,
 }
 
-impl SeqSerializer {
-    pub fn new(array: RArray) -> SeqSerializer {
-        SeqSerializer { array }
+impl<'r> SeqSerializer<'r> {
+    pub fn new(ruby: &'r Ruby, array: RArray) -> SeqSerializer<'r> {
+        SeqSerializer { ruby, array }
     }
 }
 
-impl SerializeSeq for SeqSerializer {
+impl<'r> SerializeSeq for SeqSerializer<'r> {
     type Ok = Value;
     type Error = Error;
 
@@ -25,16 +26,16 @@ impl SerializeSeq for SeqSerializer {
         Element: Serialize + ?Sized,
     {
         self.array
-            .push(element.serialize(Serializer)?)
+            .push(element.serialize(Serializer::new(self.ruby))?)
             .map_err(Into::into)
     }
 
     fn end(self) -> Result<Self::Ok, self::Error> {
-        Ok(self.array.into_value())
+        Ok(self.array.into_value_with(self.ruby))
     }
 }
 
-impl SerializeTuple for SeqSerializer {
+impl<'r> SerializeTuple for SeqSerializer<'r> {
     type Ok = Value;
     type Error = Error;
 
@@ -50,7 +51,7 @@ impl SerializeTuple for SeqSerializer {
     }
 }
 
-impl SerializeTupleStruct for SeqSerializer {
+impl<'r> SerializeTupleStruct for SeqSerializer<'r> {
     type Ok = Value;
     type Error = Error;
 
