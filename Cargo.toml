@@ -1,10 +1,13 @@
 [package]
 name = "serde_magnus"
-version = "0.9.0"
+version = "0.10.0"
 description = "Serde integration for Magnus"
 edition = "2018"
 rust-version = "1.65"
-authors = ["Joe Wilm <joe@jwilm.com>", "George Claghorn <georgeclaghorn@gmail.com>"]
+authors = [
+    "Joe Wilm <joe@jwilm.com>",
+    "George Claghorn <georgeclaghorn@gmail.com>",
+]
 repository = "https://github.com/OneSignal/serde-magnus"
 homepage = "https://github.com/OneSignal/serde-magnus"
 documentation = "https://docs.rs/serde_magnus"
