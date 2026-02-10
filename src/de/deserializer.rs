@@ -66,13 +66,17 @@ impl<'r, 'i> serde::Deserializer<'i> for Deserializer<'r> {
             return visitor.visit_map(HashDeserializer::new(self.ruby, hash)?);
         }
 
-        Err(Error::new(
-            self.ruby.exception_type_error(),
-            format!(
-                "can't deserialize {}",
-                unsafe { self.value.classname() }.into_owned()
-            ),
-        ))
+        let class = unsafe { self.value.classname() }.into_owned();
+        match class.as_str() {
+            "Time" | "ActiveSupport::TimeWithZone" => {
+                let time: RString = self.value.funcall("iso8601", (9,))?;
+                visitor.visit_string(time.to_string()?)
+            }
+            _ => Err(Error::new(
+                self.ruby.exception_type_error(),
+                format!("can't deserialize {class}"),
+            )),
+        }
     }
 
     fn deserialize_bytes<Visitor>(self, _visitor: Visitor) -> Result<Visitor::Value, Self::Error>
